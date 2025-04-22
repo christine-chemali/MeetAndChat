@@ -150,7 +150,7 @@ void show_create_account_content(GtkWidget *stack, GCallback return_to_login_cal
     gtk_box_append(GTK_BOX(recover_container), recover_second_question_label);
     gtk_box_append(GTK_BOX(recover_container), second_question_entry);
 
-    // Buttons : Get started and return
+    // Buttons : Register and return
     GtkWidget *action_button_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_size_request(action_button_container, container_width, -1);
     gtk_widget_set_halign(action_button_container, GTK_ALIGN_CENTER);

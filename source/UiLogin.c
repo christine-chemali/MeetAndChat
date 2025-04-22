@@ -64,6 +64,7 @@ void create_login_interface(GtkWidget *stack) {
     gtk_widget_set_halign(text_label, GTK_ALIGN_START);
     gtk_widget_set_css_classes(text_label, (const char *[]){"custom-text", NULL}); //css
     gtk_widget_set_margin_top(text_label, 0);
+    gtk_widget_set_margin_bottom(text_label, 10);
 
     gtk_box_append(GTK_BOX(title_container), title_label); 
     gtk_box_append(GTK_BOX(title_container), text_label); 
@@ -108,15 +109,16 @@ void create_login_interface(GtkWidget *stack) {
     GtkWidget *username_entry = gtk_entry_new();
     gtk_widget_set_size_request(username_entry, 200, -1);
     gtk_widget_set_css_classes(username_entry, (const char *[]){"custom-entry", NULL}); // css
-
+    gtk_widget_set_margin_bottom(username_entry, 8);
+    /* 
     GtkWidget *forgot_email_link = gtk_button_new_with_label("Forgot your email?");
     gtk_widget_set_halign(forgot_email_link, GTK_ALIGN_END);
     gtk_widget_set_css_classes(forgot_email_link, (const char *[]){"link-button", NULL}); // css
     g_signal_connect(forgot_email_link, "clicked", G_CALLBACK(show_forgot_email), stack);
-
+    */
     gtk_box_append(GTK_BOX(username_container), username_label);
     gtk_box_append(GTK_BOX(username_container), username_entry);
-    gtk_box_append(GTK_BOX(username_container), forgot_email_link);
+   /* gtk_box_append(GTK_BOX(username_container), forgot_email_link);*/
 
     // Password 
     GtkWidget *password_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
