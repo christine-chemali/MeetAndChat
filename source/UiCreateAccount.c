@@ -15,15 +15,29 @@ void show_create_account_content(GtkWidget *stack, GCallback return_to_login_cal
     gtk_widget_set_margin_start(account_box, 20);
     gtk_widget_set_margin_end(account_box, 20);
 
+    int container_width = 220;
 
-    GtkWidget *confirm_button = gtk_button_new_with_label("Confirm");
+    // Buttons : Get started and return
+    GtkWidget *action_button_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_size_request(action_button_container, container_width, -1);
+    gtk_widget_set_halign(action_button_container, GTK_ALIGN_CENTER);
+
+    GtkWidget *confirm_button = gtk_button_new_with_label("REGISTER");
     g_signal_connect(confirm_button, "clicked", G_CALLBACK(handle_create_account_choice), stack);
+    gtk_widget_set_css_classes(confirm_button, (const char *[]){"custom-button", NULL}); //css
+    gtk_widget_set_margin_top(confirm_button, 5);
 
     GtkWidget *return_link = gtk_button_new_with_label("Return to Login");
     g_signal_connect(return_link, "clicked", return_to_login_callback, stack);
+    gtk_widget_set_css_classes(return_link,(const char *[]){"link-account-button", NULL}); //css
+    gtk_widget_set_margin_top(return_link, 5);
+    
+    gtk_box_append(GTK_BOX(action_button_container), confirm_button);
+    gtk_box_append(GTK_BOX(action_button_container), return_link);
+    
+    //Add containers to main box
+    gtk_box_append(GTK_BOX(account_box), action_button_container);
 
-    gtk_box_append(GTK_BOX(account_box), confirm_button);
-    gtk_box_append(GTK_BOX(account_box), return_link);
 
     gtk_stack_add_named(GTK_STACK(stack), account_box, "create_account");
 }
