@@ -1,0 +1,81 @@
+/*Css file*/
+
+:root {
+    --main-font-color: #030303;
+    --main-background-color: #fefad7;
+    --link-color-hover: #007BFF;
+    --link-color:#0056b3; 
+    --border: 2px solid #030303;
+    --border-radius: 4px;
+    --button-bg-color: #030303;
+    --button-text-color: white;
+    --button-bg-hover:#c2c2c2;
+    --button-hover-border: 2px solid #c2c2c2;
+}
+.window {
+    background-color:var(--main-background-color);
+    border-radius: 10px;
+    color: var(--main-font-color);
+    border: var(--border);
+}
+
+headerbar {
+    background: var(--main-background-color);
+ }
+headerbar.default-decoration {
+    background-color: var(--main-background-color);
+    color: var(--main-font-color); 
+    border-bottom: var(--border);
+}
+.logo {
+    margin: 0px;
+    padding: 0px;
+}
+.custom-title {
+    font-weight: bold;
+    font-size: xx-large;
+}
+.link-account-button {
+    font-weight: bold;
+    font-size: large;
+}
+button { 
+    color:var(--main-font-color); 
+}
+.custom-entry{
+    color: var(--main-font-color);
+    border: var(--border); 
+    border-radius: var(--border-radius); 
+}
+.custom-label{
+    color: var(--main-font-color);
+}
+.link-button, .link-account-button {
+    background: none; 
+    color: var(--link-color); 
+    border: none; 
+    box-shadow: none;
+    margin-top: 0px;
+    padding-top: 0px;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+.link-button:hover, .link-account-button:hover {
+    color: var(--link-color-hover);
+}
+.custom-checkbox{
+    color: var(--main-font-color); 
+}
+.custom-button{
+    background: var(--button-bg-color);
+    color: var(--button-text-color);
+    font-weight: bold;
+    border: var(--border);
+}
+.custom-button:hover{
+    background: var(--button-bg-hover);
+    color: var(--main-font-color);
+    font-weight: bold;
+    border: var(--button-hover-border);
+}
+
