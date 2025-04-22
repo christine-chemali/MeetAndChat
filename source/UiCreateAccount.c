@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include "Utils.h"
 
 // had to change for future action with database
 static void handle_create_account_choice(GtkWidget *widget, gpointer data)
@@ -21,7 +22,7 @@ void show_create_account_content(GtkWidget *stack, GCallback return_to_login_cal
     gtk_widget_set_size_request(account_title_container, container_width, -1);
     gtk_widget_set_halign(account_title_container, GTK_ALIGN_CENTER);
 
-    GtkWidget *account_title_label = gtk_label_new("CREATE ACCOUNT");
+    GtkWidget *account_title_label = gtk_label_new("SIGN UP");
     gtk_widget_set_halign(account_title_label, GTK_ALIGN_START);
     gtk_widget_set_css_classes(account_title_label, (const char *[]){"custom-title", NULL});
 
@@ -63,11 +64,11 @@ void show_create_account_content(GtkWidget *stack, GCallback return_to_login_cal
 
     GtkWidget *email_label = gtk_label_new("Email*:");
     gtk_widget_set_halign(email_label, GTK_ALIGN_START);
-    gtk_widget_set_css_classes(email_label, (const char *[]){"custom-label", NULL});
+    gtk_widget_set_css_classes(email_label, (const char *[]){"custom-label", NULL});//css
     
     GtkWidget *email_entry = gtk_entry_new();
     gtk_widget_set_size_request(email_entry, 200, -1);
-    gtk_widget_set_css_classes(email_entry, (const char *[]){"custom-entry", NULL});
+    gtk_widget_set_css_classes(email_entry, (const char *[]){"custom-entry", NULL});//css
 
     gtk_box_append(GTK_BOX(identify_container), first_name_label);
     gtk_box_append(GTK_BOX(identify_container), first_name_entry);
@@ -78,6 +79,76 @@ void show_create_account_content(GtkWidget *stack, GCallback return_to_login_cal
     gtk_box_append(GTK_BOX(identify_container), email_label);
     gtk_box_append(GTK_BOX(identify_container), email_entry);
 
+    //Password
+    GtkWidget *account_password_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    gtk_widget_set_size_request(account_password_container, container_width, -1);
+    gtk_widget_set_halign(account_password_container, GTK_ALIGN_CENTER);
+
+    GtkWidget *account_password_label = gtk_label_new("Password*:");
+    gtk_widget_set_halign(account_password_label, GTK_ALIGN_START);
+    gtk_widget_set_css_classes(account_password_label, (const char *[]){"custom-label", NULL}); // css
+
+    GtkWidget *account_password_entry = gtk_entry_new(); 
+    gtk_entry_set_visibility(GTK_ENTRY(account_password_entry), FALSE);
+    gtk_widget_set_size_request(account_password_entry, 200, -1);
+    gtk_widget_set_css_classes(account_password_entry, (const char *[]){"custom-entry", NULL}); // css
+
+    GtkWidget *password_label_checkbox_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_box_set_spacing(GTK_BOX(password_label_checkbox_box), 115); 
+
+    GtkWidget *account_retype_password_label = gtk_label_new("Re-type password*:");
+    gtk_widget_set_halign(account_retype_password_label, GTK_ALIGN_START);
+    gtk_widget_set_css_classes(account_retype_password_label, (const char *[]){"custom-label", NULL}); // css
+
+    GtkWidget *retype_password_entry = gtk_entry_new();
+    gtk_entry_set_visibility(GTK_ENTRY(retype_password_entry), FALSE);
+    gtk_widget_set_size_request(retype_password_entry, 200, -1);
+    gtk_widget_set_css_classes(retype_password_entry, (const char *[]){"custom-entry", NULL}); // css
+
+    GtkWidget *show_account_password_check = gtk_check_button_new_with_label("Show");
+    gtk_widget_set_halign(show_account_password_check, GTK_ALIGN_END);
+    g_signal_connect(show_account_password_check, "toggled", G_CALLBACK(toggle_passwordVisibility), account_password_entry);
+    g_signal_connect(show_account_password_check, "toggled", G_CALLBACK(toggle_passwordVisibility), retype_password_entry);
+    gtk_widget_set_css_classes(show_account_password_check, (const char *[]){"custom-checkbox", NULL}); // css
+
+    gtk_box_append(GTK_BOX(password_label_checkbox_box), account_password_label);
+    gtk_box_append(GTK_BOX(password_label_checkbox_box), show_account_password_check);
+
+    gtk_box_append(GTK_BOX(account_password_container), password_label_checkbox_box);
+    gtk_box_append(GTK_BOX(account_password_container), account_password_entry);
+    gtk_box_append(GTK_BOX(account_password_container), account_retype_password_label);
+    gtk_box_append(GTK_BOX(account_password_container), retype_password_entry);
+
+    //Recover questions
+    GtkWidget *recover_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    gtk_widget_set_size_request(recover_container, container_width, -1);
+    gtk_widget_set_halign(recover_container, GTK_ALIGN_CENTER);
+
+    GtkWidget *recover_label = gtk_label_new("To recover your account, please answer:");
+    gtk_widget_set_halign(recover_label, GTK_ALIGN_START);
+    gtk_widget_set_css_classes(recover_label, (const char *[]){"custom-label", NULL}); // css
+
+    GtkWidget *recover_first_question_label = gtk_label_new("What is your favorite cartoon character*?");
+    gtk_widget_set_halign(recover_first_question_label, GTK_ALIGN_START);
+    gtk_widget_set_css_classes(recover_first_question_label, (const char *[]){"custom-label", NULL}); // css
+
+    GtkWidget *first_question_entry = gtk_entry_new();
+    gtk_widget_set_size_request(first_question_entry, 200, -1);
+    gtk_widget_set_css_classes(first_question_entry, (const char *[]){"custom-entry", NULL}); // css
+
+    GtkWidget *recover_second_question_label = gtk_label_new("What is the weirdest food you've eaten*?");
+    gtk_widget_set_halign(recover_second_question_label, GTK_ALIGN_START);
+    gtk_widget_set_css_classes(recover_second_question_label, (const char *[]){"custom-label", NULL}); // css
+
+    GtkWidget *second_question_entry = gtk_entry_new();
+    gtk_widget_set_size_request(second_question_entry, 200, -1);
+    gtk_widget_set_css_classes(second_question_entry, (const char *[]){"custom-entry", NULL}); // css
+
+    gtk_box_append(GTK_BOX(recover_container), recover_label);
+    gtk_box_append(GTK_BOX(recover_container), recover_first_question_label);
+    gtk_box_append(GTK_BOX(recover_container), first_question_entry);
+    gtk_box_append(GTK_BOX(recover_container), recover_second_question_label);
+    gtk_box_append(GTK_BOX(recover_container), second_question_entry);
 
     // Buttons : Get started and return
     GtkWidget *action_button_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -100,8 +171,9 @@ void show_create_account_content(GtkWidget *stack, GCallback return_to_login_cal
     //Add containers to main box
     gtk_box_append(GTK_BOX(account_box), account_title_container);
     gtk_box_append(GTK_BOX(account_box), identify_container);
+    gtk_box_append(GTK_BOX(account_box), account_password_container);
+    gtk_box_append(GTK_BOX(account_box), recover_container);
     gtk_box_append(GTK_BOX(account_box), action_button_container);
-
 
     gtk_stack_add_named(GTK_STACK(stack), account_box, "create_account");
 }

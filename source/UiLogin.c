@@ -3,21 +3,13 @@
 #include "UiForgotEmail.h"
 #include "UiCreateAccount.h"
 #include "CssLoading.h"
+#include "Utils.h"
 
 //had to change for the sign up process
 static void
 event_login(GtkWidget *widget, gpointer data)
 {
     g_print("LOGIN\n");
-}
-
-//Password visibility
-static void
-toggle_passwordVisibility(GtkWidget *widget, gpointer data)
-{
-    GtkWidget *password_entry = data;
-    gboolean visible = gtk_entry_get_visibility(GTK_ENTRY(password_entry));
-    gtk_entry_set_visibility(GTK_ENTRY(password_entry), !visible);
 }
 
 //Display Create an account page
