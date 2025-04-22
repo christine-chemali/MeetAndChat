@@ -78,4 +78,6 @@ button {
     font-weight: bold;
     border: var(--button-hover-border);
 }
-
+.small-custom-text {
+    font-weight: bold;
+}

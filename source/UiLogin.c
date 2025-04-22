@@ -81,14 +81,18 @@ void create_login_interface(GtkWidget *stack) {
     gtk_widget_set_size_request(create_account_container, container_width, -1);
     gtk_widget_set_halign(create_account_container, GTK_ALIGN_CENTER);
 
+    GtkWidget *small_text_label = gtk_label_new("OR");
+    gtk_widget_set_halign(small_text_label, GTK_ALIGN_CENTER);
+    gtk_widget_set_css_classes(small_text_label, (const char *[]){"small-custom-text", NULL});
+    gtk_widget_set_margin_top(small_text_label, 10);
+
     GtkWidget *create_account_link = gtk_button_new_with_label("CREATE AN ACCOUNT");
     gtk_widget_set_halign(create_account_link, GTK_ALIGN_CENTER);
-    gtk_widget_set_margin_top(create_account_link, 10);
-    gtk_widget_set_margin_bottom(create_account_link,0);
-    
+    gtk_widget_set_margin_top(create_account_link, 0);
     gtk_widget_set_css_classes(create_account_link, (const char *[]){"link-account-button", NULL});//css
     
     g_signal_connect(create_account_link, "clicked", G_CALLBACK(show_create_account), stack);
+    gtk_box_append(GTK_BOX(create_account_container), small_text_label);
     gtk_box_append(GTK_BOX(create_account_container), create_account_link);
     
     //logo icon 
@@ -156,9 +160,10 @@ void create_login_interface(GtkWidget *stack) {
     gtk_box_append(GTK_BOX(password_container), forgot_password_link);
 
     //Sign In
-    GtkWidget *login_button = gtk_button_new_with_label("Sign In");
+    GtkWidget *login_button = gtk_button_new_with_label("LOGIN");
     gtk_widget_set_size_request(login_button, 210, -1);
     gtk_widget_set_halign(login_button, GTK_ALIGN_CENTER);
+    gtk_widget_set_margin_top(login_button, 5);
 
     gtk_widget_set_css_classes(login_button, (const char *[]){"custom-button", NULL});//css
     g_signal_connect(login_button, "clicked", G_CALLBACK(event_login), NULL);
