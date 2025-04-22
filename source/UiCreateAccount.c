@@ -61,12 +61,23 @@ void show_create_account_content(GtkWidget *stack, GCallback return_to_login_cal
     gtk_widget_set_size_request(username_entry, 200, -1);
     gtk_widget_set_css_classes(username_entry, (const char *[]){"custom-entry", NULL});//css
 
+    GtkWidget *email_label = gtk_label_new("Email*:");
+    gtk_widget_set_halign(email_label, GTK_ALIGN_START);
+    gtk_widget_set_css_classes(email_label, (const char *[]){"custom-label", NULL});
+    
+    GtkWidget *email_entry = gtk_entry_new();
+    gtk_widget_set_size_request(email_entry, 200, -1);
+    gtk_widget_set_css_classes(email_entry, (const char *[]){"custom-entry", NULL});
+
     gtk_box_append(GTK_BOX(identify_container), first_name_label);
     gtk_box_append(GTK_BOX(identify_container), first_name_entry);
     gtk_box_append(GTK_BOX(identify_container), last_name_label);
     gtk_box_append(GTK_BOX(identify_container), last_name_entry);
     gtk_box_append(GTK_BOX(identify_container), username_label);
     gtk_box_append(GTK_BOX(identify_container), username_entry);
+    gtk_box_append(GTK_BOX(identify_container), email_label);
+    gtk_box_append(GTK_BOX(identify_container), email_entry);
+
 
     // Buttons : Get started and return
     GtkWidget *action_button_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
