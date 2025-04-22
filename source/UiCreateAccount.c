@@ -16,6 +16,22 @@ void show_create_account_content(GtkWidget *stack, GCallback return_to_login_cal
     gtk_widget_set_margin_end(account_box, 20);
 
     int container_width = 220;
+    //Title
+    GtkWidget *account_title_container = gtk_box_new(GTK_ORIENTATION_VERTICAL,0);
+    gtk_widget_set_size_request(account_title_container, container_width, -1);
+    gtk_widget_set_halign(account_title_container, GTK_ALIGN_CENTER);
+
+    GtkWidget *account_title_label = gtk_label_new("CREATE ACCOUNT");
+    gtk_widget_set_halign(account_title_label, GTK_ALIGN_START);
+    gtk_widget_set_css_classes(account_title_label, (const char *[]){"custom-title", NULL});
+
+    GtkWidget *account_text_label = gtk_label_new("Get started!");
+    gtk_widget_set_halign(account_text_label, GTK_ALIGN_START);
+    gtk_widget_set_css_classes(account_text_label, (const char *[]){"custom-text", NULL});
+
+    gtk_box_append(GTK_BOX(account_title_container), account_title_label);
+    gtk_box_append(GTK_BOX(account_title_container), account_text_label);
+
     // User identification
     GtkWidget *identify_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_size_request(identify_container, container_width, -1);
@@ -71,6 +87,7 @@ void show_create_account_content(GtkWidget *stack, GCallback return_to_login_cal
     gtk_box_append(GTK_BOX(action_button_container), return_link);
     
     //Add containers to main box
+    gtk_box_append(GTK_BOX(account_box), account_title_container);
     gtk_box_append(GTK_BOX(account_box), identify_container);
     gtk_box_append(GTK_BOX(account_box), action_button_container);
 
