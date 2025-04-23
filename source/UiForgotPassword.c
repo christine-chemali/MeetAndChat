@@ -33,6 +33,38 @@ void show_forgot_password_content(GtkWidget *stack, GCallback return_to_login_ca
     gtk_box_append(GTK_BOX(change_password_title_container), change_password_title_label);
     gtk_box_append(GTK_BOX(change_password_title_container), change_password_text_label);
 
+    //AUthentificate questions
+    GtkWidget *question_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    gtk_widget_set_size_request(question_container, container_width, -1);
+    gtk_widget_set_halign(question_container, GTK_ALIGN_CENTER);
+
+    GtkWidget *authenticate_text_label = gtk_label_new("Confirm your identity:");
+    gtk_widget_set_halign(authenticate_text_label, GTK_ALIGN_START);
+    gtk_widget_set_css_classes(authenticate_text_label, (const char *[]){"custom-label", NULL}); // css
+
+    GtkWidget *authenticate_first_question_label = gtk_label_new("What is your favorite cartoon character*?");
+    gtk_widget_set_halign(authenticate_first_question_label, GTK_ALIGN_START);
+    gtk_widget_set_css_classes(authenticate_first_question_label, (const char *[]){"custom-label", NULL}); // css
+
+    GtkWidget *authenticate_first_question_entry = gtk_entry_new();
+    gtk_widget_set_size_request(authenticate_first_question_entry, 200, -1);
+    gtk_widget_set_css_classes(authenticate_first_question_entry, (const char *[]){"custom-entry", NULL}); // css
+
+    GtkWidget *authenticate_second_question_label = gtk_label_new("What is the weirdest food you've eaten*?");
+    gtk_widget_set_halign(authenticate_second_question_label, GTK_ALIGN_START);
+    gtk_widget_set_css_classes(authenticate_second_question_label, (const char *[]){"custom-label", NULL}); // css
+
+    GtkWidget *authenticate_second_question_entry = gtk_entry_new();
+    gtk_widget_set_size_request(authenticate_second_question_entry, 200, -1);
+    gtk_widget_set_css_classes(authenticate_second_question_entry, (const char *[]){"custom-entry", NULL}); // css
+
+    gtk_box_append(GTK_BOX(question_container), authenticate_text_label);
+    gtk_box_append(GTK_BOX(question_container), authenticate_first_question_label);
+    gtk_box_append(GTK_BOX(question_container), authenticate_first_question_entry);
+    gtk_box_append(GTK_BOX(question_container), authenticate_second_question_label);
+    gtk_box_append(GTK_BOX(question_container), authenticate_second_question_entry);
+
+    
     //Buttons : Change and return to login
     GtkWidget *change_buttons_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_size_request(change_buttons_container, container_width, -1);
@@ -53,6 +85,7 @@ void show_forgot_password_content(GtkWidget *stack, GCallback return_to_login_ca
 
     // Add container to main box
     gtk_box_append(GTK_BOX(forgot_box), change_password_title_container);
+    gtk_box_append(GTK_BOX(forgot_box), question_container);
     gtk_box_append(GTK_BOX(forgot_box), change_buttons_container);
 
     gtk_stack_add_named(GTK_STACK(stack), forgot_box, "forgot_password");
