@@ -1,18 +1,10 @@
 #include <gtk/gtk.h>
 #include "UiForgotPassword.h"
-#include "UiForgotEmail.h"
+#include "UiMainContent.h"
 #include "UiCreateAccount.h"
 #include "CssLoading.h"
 #include "Utils.h"
 
-//had to change for the sign up process
-/* 
-static void
-event_login(GtkWidget *widget, gpointer data)
-{
-    g_print("LOGIN\n");
-}
-*/
 
 //Display Create an account page
 static void
@@ -28,7 +20,7 @@ show_forgot_password(GtkWidget *widget, gpointer stack)
     gtk_stack_set_visible_child_name(GTK_STACK(stack), "forgot_password");
 }
 
-//Display first main content
+//Display first main content / had to adapt to log process
 static void
 show_main_content(GtkWidget *widget, gpointer stack)
 {
