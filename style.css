@@ -81,3 +81,7 @@ button {
 .small-custom-text {
     font-weight: bold;
 }
+.channel-area {
+    background: white;
+    border-top-left-radius: 25px;
+}

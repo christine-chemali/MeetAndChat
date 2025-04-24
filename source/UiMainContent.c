@@ -25,6 +25,7 @@
         gtk_widget_set_margin_end(channel_box, 20);
         gtk_widget_set_halign(channel_box, GTK_ALIGN_START);
 
+
         // example of channels
         const char *channels[] = {"Général", "Développement", "Random"};
         for (int i = 0; i < 3; i++) {
@@ -75,6 +76,8 @@
         data->stack = gtk_stack_new();
         GtkWidget *scrolled_window = gtk_scrolled_window_new();
 
+        gtk_widget_set_margin_start(scrolled_window, 10);
+        gtk_widget_set_css_classes(scrolled_window, (const char*[]){"channel-area", NULL});
         gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
         gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled_window), data->stack);
 
