@@ -51,8 +51,8 @@
         GtkWidget *main_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
         gtk_widget_set_margin_top(main_container, 20);
         gtk_widget_set_margin_bottom(main_container, 20);
-        gtk_widget_set_margin_start(main_container, 20);
-        gtk_widget_set_margin_end(main_container, 20);
+        gtk_widget_set_margin_start(main_container, 8);
+        gtk_widget_set_margin_end(main_container, 0);
 
         // left box servers
         AppData *data = malloc(sizeof(AppData));
@@ -61,12 +61,14 @@
             return;
         }
         *data = (AppData){0};
-        data->left_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+        data->left_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
         gtk_box_set_homogeneous(GTK_BOX(data->left_box), FALSE);
+        gtk_widget_set_margin_top(data->left_box, 5);
 
         // buttons server (THIS HAD TO CHANGE should be created after the server is create)
         for (int i = 1; i <= 3; i++) {
-            GtkWidget *server_button = gtk_button_new_with_label(g_strdup_printf("Serveur %d", i));
+            GtkWidget *server_button = gtk_button_new_with_label(g_strdup_printf("S%d", i));
+            gtk_widget_set_css_classes(server_button, (const char *[]){"server-button", NULL});
             g_signal_connect(server_button, "clicked", G_CALLBACK(on_server_button_clicked), data);
             gtk_box_append(GTK_BOX(data->left_box), server_button);
         }

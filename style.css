@@ -85,3 +85,6 @@ button {
     background: white;
     border-top-left-radius: 25px;
 }
+.server-button{
+    border-radius: 50px;
+}
