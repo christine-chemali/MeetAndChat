@@ -6,11 +6,13 @@
 #include "Utils.h"
 
 //had to change for the sign up process
+/* 
 static void
 event_login(GtkWidget *widget, gpointer data)
 {
     g_print("LOGIN\n");
 }
+*/
 
 //Display Create an account page
 static void
@@ -26,11 +28,11 @@ show_forgot_password(GtkWidget *widget, gpointer stack)
     gtk_stack_set_visible_child_name(GTK_STACK(stack), "forgot_password");
 }
 
-//Display forgotten email page
+//Display first main content
 static void
-show_forgot_email(GtkWidget *widget, gpointer stack)
+show_main_content(GtkWidget *widget, gpointer stack)
 {
-    gtk_stack_set_visible_child_name(GTK_STACK(stack), "forgot_email");
+    gtk_stack_set_visible_child_name(GTK_STACK(stack), "main_window");
 }
 
 //Display login interface
@@ -110,15 +112,9 @@ void create_login_interface(GtkWidget *stack) {
     gtk_widget_set_size_request(username_entry, 200, -1);
     gtk_widget_set_css_classes(username_entry, (const char *[]){"custom-entry", NULL}); // css
     gtk_widget_set_margin_bottom(username_entry, 8);
-    /* 
-    GtkWidget *forgot_email_link = gtk_button_new_with_label("Forgot your email?");
-    gtk_widget_set_halign(forgot_email_link, GTK_ALIGN_END);
-    gtk_widget_set_css_classes(forgot_email_link, (const char *[]){"link-button", NULL}); // css
-    g_signal_connect(forgot_email_link, "clicked", G_CALLBACK(show_forgot_email), stack);
-    */
+
     gtk_box_append(GTK_BOX(username_container), username_label);
     gtk_box_append(GTK_BOX(username_container), username_entry);
-   /* gtk_box_append(GTK_BOX(username_container), forgot_email_link);*/
 
     // Password 
     GtkWidget *password_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
@@ -160,7 +156,7 @@ void create_login_interface(GtkWidget *stack) {
     gtk_widget_set_margin_top(login_button, 5);
 
     gtk_widget_set_css_classes(login_button, (const char *[]){"custom-button", NULL});//css
-    g_signal_connect(login_button, "clicked", G_CALLBACK(event_login), NULL);
+    g_signal_connect(login_button, "clicked", G_CALLBACK(show_main_content), stack);
 
     // Add container to main box
     gtk_box_append(GTK_BOX(login_box), logo_icon);
@@ -192,7 +188,7 @@ activate(GtkApplication *app, gpointer user_data)
     create_login_interface(stack);
 
     show_create_account_content(stack, G_CALLBACK(show_login));   
-    show_forgot_email_content(stack, G_CALLBACK(show_login)); 
+    show_first_main_content(stack, G_CALLBACK(show_login)); 
     show_forgot_password_content(stack, G_CALLBACK(show_login));
 
     gtk_stack_set_visible_child_name(GTK_STACK(stack), "login");
