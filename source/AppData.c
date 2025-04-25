@@ -9,11 +9,9 @@ void free_app_data(AppData *data) {
     }
 }
 
-//free when quit the app
+// Free the memory allocated for the application data 
 static void on_main_window_destroy(GtkWidget *widget, AppData *data) {
     free_app_data(data);
-    GApplication *app = G_APPLICATION(gtk_window_get_application(GTK_WINDOW(widget)));
-    g_application_quit(app);
 }
 
 // Give signal to free memory
