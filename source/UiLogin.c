@@ -4,6 +4,7 @@
 #include "UiCreateAccount.h"
 #include "CssLoading.h"
 #include "Utils.h"
+#include "AppData.h"
 
 
 //Display Create an account page
@@ -176,6 +177,18 @@ activate(GtkApplication *app, gpointer user_data)
 
     const char *window_classes[] = {"window", NULL};//css
     gtk_widget_set_css_classes(window, window_classes);//css
+   
+    AppData *data = malloc(sizeof(AppData));    
+        if (!data) {        
+            g_critical("Impossible to allow AppData");       
+             return;    
+    } 
+
+    data->left_box = NULL;     
+    data->stack = stack;     
+    data->servers = NULL;    
+    
+    connect_window_destroy_signal(window, data);
 
     create_login_interface(stack);
 

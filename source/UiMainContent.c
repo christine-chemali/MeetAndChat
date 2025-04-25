@@ -1,14 +1,9 @@
 
     #include <gtk/gtk.h>
     #include <stdlib.h>
+    #include "UiCreateServer.h"
+    #include "AppData.h"
 
-    // to stock data structure
-    typedef struct {
-        GtkWidget *left_box;
-        GtkWidget *stack;
-        GList *servers; 
-    } AppData;
- 
     // Display channels
     void display_channels_for_server(const char *server_name, AppData *data) {
         GtkWidget *existing_page = gtk_stack_get_child_by_name(GTK_STACK(data->stack), server_name);
@@ -105,7 +100,7 @@
         GtkWidget *create_icon = gtk_image_new_from_file("./media/icons/add.png");
         gtk_button_set_child(GTK_BUTTON(create_button), create_icon); 
         gtk_image_set_pixel_size(GTK_IMAGE(create_icon), 25); 
-        g_signal_connect(create_button, "clicked", G_CALLBACK(return_to_login_callback), stack); // change here
+        g_signal_connect(create_button, "clicked", G_CALLBACK(show_create_server_content), data);
         gtk_widget_set_css_classes(create_button, (const char *[]){"icon-button", NULL}); //css
         gtk_box_append(GTK_BOX(data->left_box), create_button);
 
@@ -146,7 +141,7 @@
         GtkWidget *home_icon = gtk_image_new_from_file("./media/icons/home.png");
         gtk_button_set_child(GTK_BUTTON(home_button), home_icon); 
         gtk_image_set_pixel_size(GTK_IMAGE(home_icon), 25); 
-        g_signal_connect(home_button, "clicked", G_CALLBACK(return_to_login_callback), stack); // change here
+        g_signal_connect(home_button, "clicked", G_CALLBACK(return_to_login_callback), stack); 
         gtk_widget_set_css_classes(home_button, (const char *[]){"icon-button", NULL}); //css
 
         // notification button
@@ -154,7 +149,7 @@
         GtkWidget *notification_icon = gtk_image_new_from_file("./media/icons/notification.png");
         gtk_button_set_child(GTK_BUTTON(notification_button), notification_icon); 
         gtk_image_set_pixel_size(GTK_IMAGE(notification_icon), 25); 
-        g_signal_connect(notification_button, "clicked", G_CALLBACK(return_to_login_callback), stack); // change here
+        g_signal_connect(notification_button, "clicked", G_CALLBACK(return_to_login_callback), stack); 
         gtk_widget_set_css_classes(notification_button, (const char *[]){"icon-button", NULL}); //css
 
         // User button
@@ -162,7 +157,7 @@
         GtkWidget *user_icon = gtk_image_new_from_file("./media/icons/me.png");
         gtk_button_set_child(GTK_BUTTON(user_button), user_icon); 
         gtk_image_set_pixel_size(GTK_IMAGE(user_icon), 25); 
-        g_signal_connect(user_button, "clicked", G_CALLBACK(return_to_login_callback), stack); // change here
+        g_signal_connect(user_button, "clicked", G_CALLBACK(return_to_login_callback), stack);
         gtk_widget_set_css_classes(user_button, (const char *[]){"icon-button", NULL}); //css
 
         // Disconnect button
