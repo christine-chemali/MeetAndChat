@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include "UiUserContent.h"
+#include "BottomBar.h"
 
 
 // to display forgot password content page
@@ -28,9 +29,11 @@ void show_user_content(GtkWidget *stack, GCallback return_to_main_callback) {
     gtk_box_append(GTK_BOX(user_box), return_button);
 
     // Add container to main box
-     
     gtk_box_append(GTK_BOX(user_box), user_title_container);
 
-
+    // Add bottom bar
+    GtkWidget *bottom_bar = create_bottom_bar(stack, return_to_main_callback);    
+    gtk_box_append(GTK_BOX(user_box), bottom_bar);
+    
     gtk_stack_add_named(GTK_STACK(stack), user_box, "user_profile");
 }

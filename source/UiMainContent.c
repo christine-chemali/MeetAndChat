@@ -4,22 +4,11 @@
     #include "UiCreateServer.h"
     #include "AppData.h"
     #include "UiUserContent.h"
-    #include <gtk/gtk.h>
     #include "UiMessageList.h"
     #include "UiChannelList.h"
-
-    //Display user page
-    void show_user(GtkWidget *widget, gpointer stack)
-    {
-        gtk_stack_set_visible_child_name(GTK_STACK(stack), "user_profile");
-    }
-    
-    //Display main interface
-    static void
-    show_main(GtkWidget *widget, gpointer stack)
-    {
-        gtk_stack_set_visible_child_name(GTK_STACK(stack), "main_window");
-    }
+    #include "BottomBar.h"
+    #include "DisplayPage.h"
+  
 
     // Display channels
     void display_channels_for_server(const char *server_name, AppData *data) {
@@ -112,58 +101,17 @@
         gtk_box_append(GTK_BOX(content_box), data->left_box);
         gtk_box_append(GTK_BOX(content_box), scrolled_window);
 
-        // Bottom bar
-        GtkWidget *bottom_bar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 8);
-        gtk_widget_set_hexpand(bottom_bar, TRUE);
-        gtk_widget_set_margin_top(bottom_bar, 8);
-        gtk_widget_set_margin_end(bottom_bar, 8);
-        gtk_widget_set_halign(bottom_bar, GTK_ALIGN_END);
-
-        // home button
-        GtkWidget *home_button = gtk_button_new();
-        GtkWidget *home_icon = gtk_image_new_from_file("./media/icons/home.png");
-        gtk_button_set_child(GTK_BUTTON(home_button), home_icon); 
-        gtk_image_set_pixel_size(GTK_IMAGE(home_icon), 25); 
-        g_signal_connect(home_button, "clicked", G_CALLBACK(return_to_login_callback), stack); 
-        gtk_widget_set_css_classes(home_button, (const char *[]){"icon-button", NULL}); //css
-
-        // notification button
-        GtkWidget *notification_button = gtk_button_new();
-        GtkWidget *notification_icon = gtk_image_new_from_file("./media/icons/notification.png");
-        gtk_button_set_child(GTK_BUTTON(notification_button), notification_icon); 
-        gtk_image_set_pixel_size(GTK_IMAGE(notification_icon), 25); 
-        g_signal_connect(notification_button, "clicked", G_CALLBACK(return_to_login_callback), stack); 
-        gtk_widget_set_css_classes(notification_button, (const char *[]){"icon-button", NULL}); //css
-
-        // User button
-        GtkWidget *user_button = gtk_button_new();
-        GtkWidget *user_icon = gtk_image_new_from_file("./media/icons/me.png");
-        gtk_button_set_child(GTK_BUTTON(user_button), user_icon); 
-        gtk_image_set_pixel_size(GTK_IMAGE(user_icon), 25); 
-        g_signal_connect(user_button, "clicked", G_CALLBACK(show_user), stack);
-        /*g_signal_connect(user_button, "clicked", G_CALLBACK(return_to_login_callback), stack);*/
-        gtk_widget_set_css_classes(user_button, (const char *[]){"icon-button", NULL}); //css
-
-        // Disconnect button
-        GtkWidget *return_link = gtk_button_new();
-        GtkWidget *icon = gtk_image_new_from_file("./media/icons/disconnect.png");
-        gtk_button_set_child(GTK_BUTTON(return_link), icon); 
-        g_signal_connect(return_link, "clicked", G_CALLBACK(return_to_login_callback), stack);
-        gtk_widget_set_css_classes(return_link, (const char *[]){"disconnect-button", NULL}); //css
-
-        gtk_box_append(GTK_BOX(bottom_bar), home_button);
-        gtk_box_append(GTK_BOX(bottom_bar), notification_button);
-        gtk_box_append(GTK_BOX(bottom_bar), user_button);
-        gtk_box_append(GTK_BOX(bottom_bar), return_link);
-
         //add containers to main container
         gtk_box_append(GTK_BOX(main_container), content_box);
+
+        //here bottom bar
+        GtkWidget *bottom_bar = create_bottom_bar(stack, return_to_login_callback);
         gtk_box_append(GTK_BOX(main_container), bottom_bar);
 
         gtk_widget_set_hexpand(scrolled_window, TRUE);
         gtk_widget_set_vexpand(scrolled_window, TRUE);
-
         show_user_content(stack, G_CALLBACK(show_main));
+
         // Add main container to stack
         gtk_stack_add_named(GTK_STACK(stack), main_container, "main_window");
         gtk_stack_set_visible_child(GTK_STACK(stack), main_container);
