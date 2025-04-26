@@ -3,6 +3,20 @@
     #include <stdlib.h>
     #include "UiCreateServer.h"
     #include "AppData.h"
+    #include "UiUserContent.h"
+
+    //Display user page
+    void show_user(GtkWidget *widget, gpointer stack)
+    {
+        gtk_stack_set_visible_child_name(GTK_STACK(stack), "user_profile");
+    }
+    
+    //Display main interface
+    static void
+    show_main(GtkWidget *widget, gpointer stack)
+    {
+        gtk_stack_set_visible_child_name(GTK_STACK(stack), "main_window");
+    }
 
     // Display channels
     void display_channels_for_server(const char *server_name, AppData *data) {
@@ -157,7 +171,8 @@
         GtkWidget *user_icon = gtk_image_new_from_file("./media/icons/me.png");
         gtk_button_set_child(GTK_BUTTON(user_button), user_icon); 
         gtk_image_set_pixel_size(GTK_IMAGE(user_icon), 25); 
-        g_signal_connect(user_button, "clicked", G_CALLBACK(return_to_login_callback), stack);
+        g_signal_connect(user_button, "clicked", G_CALLBACK(show_user), stack);
+        /*g_signal_connect(user_button, "clicked", G_CALLBACK(return_to_login_callback), stack);*/
         gtk_widget_set_css_classes(user_button, (const char *[]){"icon-button", NULL}); //css
 
         // Disconnect button
@@ -179,6 +194,7 @@
         gtk_widget_set_hexpand(scrolled_window, TRUE);
         gtk_widget_set_vexpand(scrolled_window, TRUE);
 
+        show_user_content(stack, G_CALLBACK(show_main));
         // Add main container to stack
         gtk_stack_add_named(GTK_STACK(stack), main_container, "main_window");
         gtk_stack_set_visible_child(GTK_STACK(stack), main_container);

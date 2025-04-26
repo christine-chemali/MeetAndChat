@@ -180,7 +180,7 @@ activate(GtkApplication *app, gpointer user_data)
    
     AppData *data = malloc(sizeof(AppData));    
         if (!data) {        
-            g_critical("Impossible to allow AppData");       
+            g_critical("Unable to allocate AppData");       
              return;    
     } 
 
