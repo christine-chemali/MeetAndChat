@@ -4,6 +4,9 @@
     #include "UiCreateServer.h"
     #include "AppData.h"
     #include "UiUserContent.h"
+    #include <gtk/gtk.h>
+    #include "UiMessageList.h"
+    #include "UiChannelList.h"
 
     //Display user page
     void show_user(GtkWidget *widget, gpointer stack)
@@ -27,45 +30,11 @@
         }
 
         if (strcmp(server_name, "Messages") == 0) {
-            // Create a list of private conversations
-            GtkWidget *messages_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-            gtk_widget_set_margin_top(messages_box, 20);
-            gtk_widget_set_margin_bottom(messages_box, 20);
-            gtk_widget_set_margin_start(messages_box, 20);
-            gtk_widget_set_margin_end(messages_box, 20);
-            gtk_widget_set_halign(messages_box, GTK_ALIGN_START);
-
-            // Example of the user private interlocutor
-            const char *conversations[] = {"User1", "User2", "User3"};
-            for (int i = 0; i < 3; i++) {
-                GtkWidget *conv_label = gtk_label_new(conversations[i]);
-                gtk_widget_set_halign(conv_label, GTK_ALIGN_START);
-                gtk_box_append(GTK_BOX(messages_box), conv_label);
-            }
-
-            gtk_stack_add_named(GTK_STACK(data->stack), messages_box, server_name);
-            gtk_stack_set_visible_child(GTK_STACK(data->stack), messages_box);
+            display_messages(GTK_STACK(data->stack), server_name);
         } else {
-            // Existing server channels display code
-            GtkWidget *channel_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-            gtk_widget_set_margin_top(channel_box, 20);
-            gtk_widget_set_margin_bottom(channel_box, 20);
-            gtk_widget_set_margin_start(channel_box, 20);
-            gtk_widget_set_margin_end(channel_box, 20);
-            gtk_widget_set_halign(channel_box, GTK_ALIGN_START);
-
-            const char *channels[] = {"Général", "Développement", "Random"};
-            for (int i = 0; i < 3; i++) {
-                GtkWidget *channel_label = gtk_label_new(channels[i]);
-                gtk_widget_set_halign(channel_label, GTK_ALIGN_START);
-                gtk_box_append(GTK_BOX(channel_box), channel_label);
-            }
-
-            gtk_stack_add_named(GTK_STACK(data->stack), channel_box, server_name);
-            gtk_stack_set_visible_child(GTK_STACK(data->stack), channel_box);
+            display_channels(GTK_STACK(data->stack), server_name);
         }
     }
-
     // when server or message button clicked
     static void on_server_button_clicked(GtkButton *button, AppData *data) {
         const char *button_name = gtk_widget_get_name(GTK_WIDGET(button));
