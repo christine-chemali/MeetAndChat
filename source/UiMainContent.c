@@ -8,6 +8,7 @@
 #include "BottomBar.h"
 #include "DisplayPage.h"
 #include "UiNetwork.h"
+#include "UiNotification.h"
 
 // Display channels
 void display_channels_for_server(const char *server_name, AppData *data) {
@@ -115,6 +116,7 @@ void show_first_main_content(GtkWidget *stack, GCallback return_to_login_callbac
 
     // Show user content
     show_create_server_content(stack, G_CALLBACK(show_main));
+    show_notification_content(stack, G_CALLBACK(show_main));
     show_user_content(stack, G_CALLBACK(show_main));
 
     // Add main container to stack

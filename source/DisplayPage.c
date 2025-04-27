@@ -10,6 +10,11 @@
     {
         gtk_stack_set_visible_child_name(GTK_STACK(stack), "create_server");
     }
+    //Display notification page
+    void show_notification(GtkWidget *widget, gpointer stack)
+    {
+        gtk_stack_set_visible_child_name(GTK_STACK(stack), "user_notification");
+    }
     //Display main interface
     void show_main(GtkWidget *widget, gpointer stack)
     {

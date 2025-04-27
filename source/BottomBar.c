@@ -1,6 +1,7 @@
 #include "BottomBar.h"
 #include "UiUserContent.h"
 #include "DisplayPage.h"
+#include "UiNotification.h"
 #include "UiLogin.h"
 
 //Bottom Bar
@@ -25,7 +26,8 @@ GtkWidget *create_bottom_bar(GtkWidget *stack, GCallback return_to_login_callbac
     GtkWidget *notification_icon = gtk_image_new_from_file("./media/icons/notification.png");
     gtk_button_set_child(GTK_BUTTON(notification_button), notification_icon);
     gtk_image_set_pixel_size(GTK_IMAGE(notification_icon), 25);
-    g_signal_connect(notification_button, "clicked", return_to_login_callback, stack);
+    /*g_signal_connect(notification_button, "clicked", return_to_login_callback, stack);*/
+    g_signal_connect(notification_button, "clicked", G_CALLBACK(show_notification), stack);
     gtk_widget_set_css_classes(notification_button, (const char *[]){"icon-button", NULL});
 
     // User button
