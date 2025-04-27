@@ -16,7 +16,7 @@ GtkWidget *create_bottom_bar(GtkWidget *stack, GCallback return_to_login_callbac
     GtkWidget *home_icon = gtk_image_new_from_file("./media/icons/home.png");
     gtk_button_set_child(GTK_BUTTON(home_button), home_icon);
     gtk_image_set_pixel_size(GTK_IMAGE(home_icon), 25);
-    g_signal_connect(home_button, "clicked", return_to_login_callback, stack);
+    g_signal_connect(home_button, "clicked", G_CALLBACK(on_home_button_clicked), stack);
     gtk_widget_set_css_classes(home_button, (const char *[]){"icon-button", NULL});
 
     // Notification button
