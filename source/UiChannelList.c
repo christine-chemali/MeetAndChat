@@ -18,7 +18,11 @@ void display_channels(GtkStack *stack, const char *server_name) {
         gtk_widget_set_halign(channel_label, GTK_ALIGN_START);
         gtk_box_append(GTK_BOX(channel_box), channel_label);
     }
-
+        // Test scrollbar
+        for (int i = 0; i < 50; i++) {
+        GtkWidget *test_label = gtk_label_new("Test Line");
+        gtk_box_append(GTK_BOX(channel_box), test_label);
+    }
     gtk_stack_add_named(stack, channel_box, server_name);
     gtk_stack_set_visible_child(stack, channel_box);
 }

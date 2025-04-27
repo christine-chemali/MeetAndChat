@@ -12,14 +12,18 @@ void display_messages(GtkStack *stack, const char *server_name) {
     gtk_widget_set_margin_end(messages_box, 20);
     gtk_widget_set_halign(messages_box, GTK_ALIGN_START);
 
-    // Example of the user private interlocutor
+    // Example 
     const char *conversations[] = {"User1", "User2", "User3"};
     for (int i = 0; i < 3; i++) {
         GtkWidget *conv_label = gtk_label_new(conversations[i]);
         gtk_widget_set_halign(conv_label, GTK_ALIGN_START);
         gtk_box_append(GTK_BOX(messages_box), conv_label);
     }
-
+    // Test scrollbar
+    for (int i = 0; i < 50; i++) {
+        GtkWidget *test_label = gtk_label_new("Test Line");
+        gtk_box_append(GTK_BOX(messages_box), test_label);
+    }
     gtk_stack_add_named(stack, messages_box, server_name);
     gtk_stack_set_visible_child(stack, messages_box);
 }

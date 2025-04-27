@@ -8,10 +8,11 @@
     --border: 2px solid #030303;
     --border-radius: 4px;
     --button-bg-color: #030303;
-    --button-text-color: white;
+    --button-text-color:  #ffffff;
     --button-bg-hover:#c2c2c2;
     --button-hover-border: 2px solid #c2c2c2;
     --disconnect-button-background: #ff5252;
+    --page-background-color:  #ffffff;
 }
 .window {
     background-color:var(--main-background-color);
@@ -83,7 +84,7 @@ button {
     font-weight: bold;
 }
 .channel-area {
-    background: white;
+    background: var(--page-background-color);
     border-top-left-radius: 25px;
 }
 .server-button{
@@ -107,4 +108,7 @@ button {
     background: none;
     border: none;
     color: var(--main-font-color);
+}
+.user-area {
+    background: var(--page-background-color);
 }
