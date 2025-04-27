@@ -68,13 +68,13 @@ void show_first_main_content(GtkWidget *stack, GCallback return_to_login_callbac
         gtk_box_append(GTK_BOX(data->left_box), server_button);
     }
 
-    // Create server button
+    // Create Server Button
     GtkWidget *create_button = gtk_button_new();
     GtkWidget *create_icon = gtk_image_new_from_file("./media/icons/add.png");
     gtk_button_set_child(GTK_BUTTON(create_button), create_icon); 
     gtk_image_set_pixel_size(GTK_IMAGE(create_icon), 25); 
-    g_signal_connect(create_button, "clicked", G_CALLBACK(show_create_server_content), data);
-    gtk_widget_set_css_classes(create_button, (const char *[]){"icon-button", NULL});
+    g_signal_connect(create_button, "clicked", G_CALLBACK(show_create), stack);
+    gtk_widget_set_css_classes(create_button, (const char *[]){"icon-button", NULL}); //css
     gtk_box_append(GTK_BOX(data->left_box), create_button);
 
     // Network button
@@ -114,6 +114,7 @@ void show_first_main_content(GtkWidget *stack, GCallback return_to_login_callbac
     gtk_box_append(GTK_BOX(main_container), bottom_bar);
 
     // Show user content
+    show_create_server_content(stack, G_CALLBACK(show_main));
     show_user_content(stack, G_CALLBACK(show_main));
 
     // Add main container to stack
