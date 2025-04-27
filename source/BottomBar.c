@@ -1,6 +1,7 @@
 #include "BottomBar.h"
 #include "UiUserContent.h"
 #include "DisplayPage.h"
+#include "UiLogin.h"
 
 //Bottom Bar
 GtkWidget *create_bottom_bar(GtkWidget *stack, GCallback return_to_login_callback)
@@ -39,7 +40,7 @@ GtkWidget *create_bottom_bar(GtkWidget *stack, GCallback return_to_login_callbac
     GtkWidget *return_link = gtk_button_new();
     GtkWidget *icon = gtk_image_new_from_file("./media/icons/disconnect.png");
     gtk_button_set_child(GTK_BUTTON(return_link), icon);
-    g_signal_connect(return_link, "clicked", return_to_login_callback, stack);
+    g_signal_connect(return_link, "clicked", G_CALLBACK(on_disconnect_button_clicked), stack);
     gtk_widget_set_css_classes(return_link, (const char *[]){"disconnect-button", NULL});
 
     gtk_box_append(GTK_BOX(bottom_bar), home_button);

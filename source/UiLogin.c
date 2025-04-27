@@ -35,6 +35,10 @@ show_login(GtkWidget *widget, gpointer stack)
     gtk_stack_set_visible_child_name(GTK_STACK(stack), "login");
 }
 
+//Disconnect
+void on_disconnect_button_clicked(GtkWidget *widget, gpointer stack) {
+    show_login(widget, stack); 
+}
 // Create Elements of the Login page
 void create_login_interface(GtkWidget *stack) {
     GtkWidget *login_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
