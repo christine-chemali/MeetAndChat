@@ -978,7 +978,7 @@ _deps
 *.lib
 
 # Executables
-*.exe
+
 *.out
 *.app
 
@@ -1018,7 +1018,7 @@ _deps
 *.dylib
 
 # Executables
-*.exe
+
 *.out
 *.app
 *.i*86

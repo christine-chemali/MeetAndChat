@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <libpq-fe.h>
+# include <ctype.h>
+/*#include <libpq-fe.h>*/
 #include "ValidationProcess.h"
 
 // Validate email process
