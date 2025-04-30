@@ -1,5 +1,5 @@
 #include <gtk/gtk.h>
-#include "Utils.h"
+#include "graphics/utils/Utils.h"
 
 // had to change for future action with database
 static void handle_create_account_choice(GtkWidget *widget, gpointer data)

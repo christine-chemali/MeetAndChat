@@ -1,6 +1,6 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
-#include "AppData.h"
+#include "graphics/utils/AppData.h"
 
 //define server data struct
 typedef struct {

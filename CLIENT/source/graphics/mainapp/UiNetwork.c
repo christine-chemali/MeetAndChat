@@ -1,6 +1,6 @@
 #include <gtk/gtk.h>
-#include "UiNetwork.h"
-#include "AppData.h"
+#include "graphics/mainapp/UiNetwork.h"
+#include "graphics/utils/AppData.h"
 
 //Display the create server content
 void show_network_content(GtkWidget *button, AppData *data) {

@@ -1,6 +1,6 @@
 #include <gtk/gtk.h>
-#include "UiNotification.h"
-#include "BottomBar.h"
+#include "graphics/mainapp/UiNotification.h"
+#include "graphics/utils/BottomBar.h"
 
 void show_notification_content(GtkWidget *stack, GCallback return_to_main_callback) {
     // main box

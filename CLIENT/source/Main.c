@@ -1,6 +1,6 @@
 #include <gtk/gtk.h>
-#include "CssLoading.h"
-#include "UiLogin.h"
+#include "graphics/utils/CssLoading.h"
+#include "graphics/login/UiLogin.h"
 
 //main 
 int main(int argc, char **argv) {

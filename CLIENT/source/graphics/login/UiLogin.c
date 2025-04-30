@@ -1,10 +1,10 @@
 #include <gtk/gtk.h>
-#include "UiForgotPassword.h"
-#include "UiMainContent.h"
-#include "UiCreateAccount.h"
-#include "CssLoading.h"
-#include "Utils.h"
-#include "AppData.h"
+#include "graphics/login/UiCreateAccount.h"
+#include "graphics/mainapp/UiMainContent.h"
+#include "graphics/login/UiForgotPassword.h"
+#include "graphics/utils/CssLoading.h"
+#include "graphics/utils/Utils.h"
+#include "graphics/utils/AppData.h"
 
 
 //Display Create an account page
@@ -88,7 +88,7 @@ void create_login_interface(GtkWidget *stack) {
     gtk_box_append(GTK_BOX(create_account_container), create_account_link);
     
     //logo icon 
-    GtkWidget *logo_icon = gtk_image_new_from_file("./media/icons/MeetAndChatLogo.png");   
+    GtkWidget *logo_icon = gtk_image_new_from_file("CLIENT/media/icons/MeetAndChatLogo.png");   
     int desired_width = 123;   
     int desired_height = 200; 
     gtk_widget_set_size_request(logo_icon, desired_width, desired_height);

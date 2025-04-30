@@ -1,14 +1,14 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
-#include "UiCreateServer.h"
-#include "AppData.h"
-#include "UiUserContent.h"
-#include "UiMessageList.h"
-#include "UiChannelList.h"
-#include "BottomBar.h"
-#include "DisplayPage.h"
-#include "UiNetwork.h"
-#include "UiNotification.h"
+#include "graphics/mainapp/UiCreateServer.h"
+#include "graphics/utils/AppData.h"
+#include "graphics/mainapp/UiUserContent.h"
+#include "graphics/mainapp/UiMessageList.h"
+#include "graphics/mainapp/UiChannelList.h"
+#include "graphics/utils/BottomBar.h"
+#include "graphics/utils/DisplayPage.h"
+#include "graphics/mainapp/UiNetwork.h"
+#include "graphics/mainapp/UiNotification.h"
 
 // Display channels
 void display_channels_for_server(const char *server_name, AppData *data) {
@@ -53,7 +53,7 @@ void show_first_main_content(GtkWidget *stack, GCallback return_to_login_callbac
 
     // Message button
     GtkWidget *message_button = gtk_button_new();
-    GtkWidget *message_icon = gtk_image_new_from_file("./media/icons/message.png");
+    GtkWidget *message_icon = gtk_image_new_from_file("CLIENT/media/icons/message.png");
     gtk_image_set_pixel_size(GTK_IMAGE(message_icon), 25); 
     gtk_button_set_child(GTK_BUTTON(message_button), message_icon); 
     gtk_widget_set_css_classes(message_button, (const char *[]){"icon-button", NULL});
@@ -71,7 +71,7 @@ void show_first_main_content(GtkWidget *stack, GCallback return_to_login_callbac
 
     // Create Server Button
     GtkWidget *create_button = gtk_button_new();
-    GtkWidget *create_icon = gtk_image_new_from_file("./media/icons/add.png");
+    GtkWidget *create_icon = gtk_image_new_from_file("CLIENT/media/icons/add.png");
     gtk_button_set_child(GTK_BUTTON(create_button), create_icon); 
     gtk_image_set_pixel_size(GTK_IMAGE(create_icon), 25); 
     g_signal_connect(create_button, "clicked", G_CALLBACK(show_create), stack);
@@ -80,7 +80,7 @@ void show_first_main_content(GtkWidget *stack, GCallback return_to_login_callbac
 
     // Network button
     GtkWidget *network_button = gtk_button_new();
-    GtkWidget *network_icon = gtk_image_new_from_file("./media/icons/network.png");
+    GtkWidget *network_icon = gtk_image_new_from_file("CLIENT/media/icons/network.png");
     gtk_button_set_child(GTK_BUTTON(network_button), network_icon); 
     gtk_image_set_pixel_size(GTK_IMAGE(network_icon), 25); 
     /*g_signal_connect(network_button, "clicked", G_CALLBACK(return_to_login_callback), stack);*/

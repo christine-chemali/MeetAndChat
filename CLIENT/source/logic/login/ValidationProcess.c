@@ -1,9 +1,8 @@
-#include <stdio.h>
+/*#include <stdio.h>*/
 #include <string.h>
 #include <stdlib.h>
-# include <ctype.h>
-/*#include <libpq-fe.h>*/
-#include "ValidationProcess.h"
+#include <ctype.h>
+#include "logic/login/ValidationProcess.h"
 
 // Validate email process
 bool validate_email(const char *email) {

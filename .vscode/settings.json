@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "utils.h": "c",
+        "appdata.h": "c",
+        "cssloading.h": "c",
+        "uiforgotpassword.h": "c",
+        "uimaincontent.h": "c"
+    }
+}

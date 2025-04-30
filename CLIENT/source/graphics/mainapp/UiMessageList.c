@@ -1,7 +1,7 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
-#include "UiMessageList.h"
-#include "AppData.h"
+#include "graphics/mainapp/UiMessageList.h"
+#include "graphics/utils/AppData.h"
 
 void display_messages(GtkStack *stack, const char *server_name) {
     // Create a list of private conversations

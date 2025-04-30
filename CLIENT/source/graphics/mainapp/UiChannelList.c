@@ -1,7 +1,7 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
-#include "UiChannelList.h"
-#include "AppData.h"
+#include "graphics/mainapp/UiChannelList.h"
+#include "graphics/utils/AppData.h"
 
 void display_channels(GtkStack *stack, const char *server_name) {
     // Existing server channels display code

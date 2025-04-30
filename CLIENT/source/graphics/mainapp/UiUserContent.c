@@ -1,6 +1,6 @@
    #include <gtk/gtk.h>
-   #include "UiUserContent.h"
-   #include "BottomBar.h"
+   #include "graphics/mainapp/UiUserContent.h"
+   #include "graphics/utils/BottomBar.h"
    
    void show_user_content(GtkWidget *stack, GCallback return_to_main_callback) {
        // main box
