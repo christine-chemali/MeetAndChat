@@ -18,4 +18,7 @@ void show_main(GtkWidget *widget, gpointer stack);
 // Callback for home button
 void on_home_button_clicked(GtkButton *button, gpointer stack);
 
+// Display parameters page
+void show_parameters(GtkWidget *widget, gpointer stack);
+
 #endif 

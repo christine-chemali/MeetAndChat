@@ -25,3 +25,8 @@
     {    
         show_main(NULL, stack);
     }
+    // to display server parameters
+    void show_parameters(GtkWidget *widget, gpointer stack)
+    {
+        gtk_stack_set_visible_child_name(GTK_STACK(stack), "server_parameters");
+    }
