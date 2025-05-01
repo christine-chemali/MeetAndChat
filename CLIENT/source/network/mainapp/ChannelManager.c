@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
+#include "logic/mainapp/InputValidation.h"
 
 // Function to populate channel dropdown
 void populate_channel_dropdown(GtkDropDown *dropdown) {
@@ -27,6 +28,19 @@ void delete_selected_channel(GtkWidget *button, GtkDropDown *drop_down) {
     }
 }
 
+// to create a channel
+void handle_create_channel(GtkWidget *button, GtkEntry *entry) {
+    const char *channel_name = gtk_editable_get_text(GTK_EDITABLE(entry));
+    
+    if (validate_channel_name(channel_name)) {
+        g_print("Creating channel: %s\n", channel_name);
+        gtk_editable_set_text(GTK_EDITABLE(entry), ""); 
+    } else {
+        g_print("Invalid channel name\n");
+    }
+}
+
+
 /*
 // when server ready 
 #include <gtk/gtk.h>
@@ -34,6 +48,7 @@ void delete_selected_channel(GtkWidget *button, GtkDropDown *drop_down) {
 #include <curl/curl.h>
 #include <string.h>
 #include <glib.h>
+#include "logic/mainapp/InputValidation.h"
 
 struct string {
     char *ptr;
@@ -175,6 +190,68 @@ void delete_selected_channel(GtkWidget *button, GtkDropDown *drop_down) {
         g_thread_new("delete_channel_thread", delete_channel, params);
     } else {
         g_print("No channel selected.\n");
+    }
+}
+
+gpointer create_channel_request(gpointer data) {
+    gpointer *params = (gpointer *)data;
+    const gchar *channel_name = (const gchar *)params[0];
+    GtkEntry *entry = (GtkEntry *)params[1];
+    GtkDropDown *drop_down = (GtkDropDown *)params[2];  // Pour le dropdown de suppression
+
+    if (validate_channel_name(channel_name)) {
+        CURL *curl;
+        CURLcode res;
+        struct string s;
+        init_string(&s);
+
+        curl_global_init(CURL_GLOBAL_DEFAULT);
+        curl = curl_easy_init();
+        
+        if (curl) {
+            char url[256];
+            snprintf(url, sizeof(url), "http://127.0.0.1:8081/api/channels/%s", channel_name);
+
+            curl_easy_setopt(curl, CURLOPT_URL, url);
+            curl_easy_setopt(curl, CURLOPT_POST, 1L);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
+
+            res = curl_easy_perform(curl);
+            if (res != CURLE_OK) {
+                g_print("Failed to create channel: %s\n", curl_easy_strerror(res));
+            } else {
+                g_print("Channel created successfully: %s\n", channel_name);
+                gdk_threads_add_idle((GSourceFunc)gtk_editable_set_text, entry);
+                g_idle_add((GSourceFunc)fetch_channels, drop_down);  // Met à jour le dropdown
+            }
+
+            curl_easy_cleanup(curl);
+        }
+        curl_global_cleanup();
+        free(s.ptr);
+    } else {
+        g_print("Invalid channel name format\n");
+    }
+
+    g_free((gpointer)channel_name);
+    g_free(params);
+    return NULL;
+}
+
+void handle_create_channel(GtkWidget *button, GtkEntry *entry) {
+    const char *channel_name = gtk_editable_get_text(GTK_EDITABLE(entry));
+    
+    if (validate_channel_name(channel_name)) {
+        gchar *channel_name_copy = g_strdup(channel_name);
+        gpointer *params = g_new(gpointer, 3);
+        params[0] = channel_name_copy;
+        params[1] = entry;
+        params[2] = g_object_get_data(G_OBJECT(entry), "dropdown");  // Récupère le dropdown associé
+
+        g_thread_new("create_channel_thread", create_channel_request, params);
+    } else {
+        g_print("Invalid channel name\n");
     }
 }
 */
