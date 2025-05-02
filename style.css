@@ -108,7 +108,26 @@ button {
     background: none;
     border: none;
     color: var(--main-font-color);
+    min-width: 28px;
+    min-height: 28px;
+    padding: 4px;
 }
 .user-area {
     background: var(--page-background-color);
 }
+.small-switch {
+    min-width: 5px;
+}
+.small-switch slider {
+    min-height: 3px;
+}
+.custom-sublabel{
+    font-weight: bold;
+}
+.custom-label-title{
+    font-weight: bold;
+    color: var(--main-font-color);
+    font-size: large;
+}
+
+
