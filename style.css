@@ -130,4 +130,20 @@ button {
     font-size: large;
 }
 
-
+.topbar-icon-button {
+    min-width: 30px;
+    min-height: 30px;
+    padding: 4px;
+    border:none;
+    box-shadow: none;
+    border-radius: 50%;
+}
+.topbar-icon-button:hover {
+    min-width: 30px;
+    min-height: 30px;
+    padding: 4px;
+    border:none;
+    box-shadow: none;
+    border-radius: 50%;
+    background: var(--button-bg-hover);
+}

@@ -53,16 +53,17 @@ void show_create_category_content(GtkWidget *stack, GCallback return_to_main_cal
     gtk_box_append(GTK_BOX(create_category), create_category_title);
 
     //Label
-    GtkWidget *create_category_label = gtk_label_new("Create a category");
+    GtkWidget *create_category_label = gtk_label_new("CREATE A CATEGORY");
     gtk_widget_set_halign(create_category_label, GTK_ALIGN_START);
     gtk_widget_set_margin_start(create_category_label, 0);
     gtk_widget_set_margin_top(create_category_label, 10);
-    gtk_widget_set_css_classes(create_category_label, (const char *[]){"custom-label", NULL});
+    gtk_widget_set_css_classes(create_category_label, (const char *[]){"custom-label-title", NULL});
     gtk_box_append(GTK_BOX(create_category), create_category_label);
 
     //entry
     GtkWidget *create_category_entry = gtk_entry_new();
     gtk_widget_set_size_request(create_category_entry, 200, -1);
+    gtk_entry_set_placeholder_text(GTK_ENTRY(create_category_entry), "Category name");
     gtk_widget_set_css_classes(create_category_entry, (const char *[]){"custom-entry", NULL});
     gtk_box_append(GTK_BOX(create_category), create_category_entry);
     
@@ -70,9 +71,9 @@ void show_create_category_content(GtkWidget *stack, GCallback return_to_main_cal
     GtkWidget *private_category_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 
      // Private Channel Description
-     GtkWidget *private_category_description = gtk_label_new("Private category can only be viewed and\naccessed by selected members and roles.");
+     GtkWidget *private_category_description = gtk_label_new("Private category can only be accessed\nby selected members and roles.");
      gtk_label_set_wrap(GTK_LABEL(private_category_description), TRUE);
-     gtk_widget_set_size_request(private_category_description, 100, -1);
+     gtk_widget_set_size_request(private_category_description, 90, -1);
      gtk_widget_set_halign(private_category_description, GTK_ALIGN_START);
      gtk_widget_set_margin_top(private_category_description, 5);
 
@@ -90,7 +91,7 @@ void show_create_category_content(GtkWidget *stack, GCallback return_to_main_cal
  
      // Private Toggle Switch
      GtkWidget *private_switch = gtk_switch_new();
-     gtk_widget_set_margin_start(private_switch, 50);
+     gtk_widget_set_margin_start(private_switch, 40);
      gtk_widget_set_css_classes(private_switch, (const char*[]){"small-switch", NULL});
 
      gtk_box_append(GTK_BOX(private_toggle_box), private_category_icon);

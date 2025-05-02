@@ -36,7 +36,7 @@ void show_create_server_content(GtkWidget *stack, GCallback return_to_main_callb
     gtk_widget_set_hexpand(create_content_box, TRUE);
 
     // Container for labels and buttons    
-    GtkWidget *parameter_container = gtk_box_new(GTK_ORIENTATION_VERTICAL,0);
+    GtkWidget *parameter_container = gtk_box_new(GTK_ORIENTATION_VERTICAL,5);
     gtk_widget_set_size_request(parameter_container, container_width, -1);
     gtk_widget_set_halign(parameter_container, GTK_ALIGN_CENTER);
 
@@ -53,16 +53,17 @@ void show_create_server_content(GtkWidget *stack, GCallback return_to_main_callb
     gtk_box_append(GTK_BOX(parameter_container), create_server_title_label);
 
     //label
-    GtkWidget *create_server_label = gtk_label_new("Server name");
+    GtkWidget *create_server_label = gtk_label_new("CREATE A SERVER");
     gtk_widget_set_halign(create_server_label, GTK_ALIGN_START);
     gtk_widget_set_margin_start(create_server_label, 0);
     gtk_widget_set_margin_top(create_server_label, 10);
-    gtk_widget_set_css_classes(create_server_label, (const char *[]){"custom-label", NULL});
+    gtk_widget_set_css_classes(create_server_label, (const char *[]){"custom-label-title", NULL});
     gtk_box_append(GTK_BOX(parameter_container), create_server_label);
 
     //entry
     GtkWidget *create_server_entry = gtk_entry_new();
     gtk_widget_set_size_request(create_server_entry, 200, -1);
+    gtk_entry_set_placeholder_text(GTK_ENTRY(create_server_entry), "Server name");
     gtk_widget_set_css_classes(create_server_entry, (const char *[]){"custom-entry", NULL});
     gtk_box_append(GTK_BOX(parameter_container), create_server_entry);
     

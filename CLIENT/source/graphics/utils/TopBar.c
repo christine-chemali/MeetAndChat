@@ -1,6 +1,6 @@
 #include "graphics/utils/TopBar.h"
 
-
+// button function to display pages
 static void switch_to_server_page(GtkWidget *button, GtkWidget *stack) {
     gtk_stack_set_visible_child_name(GTK_STACK(stack), "create_server");
 }
@@ -12,7 +12,7 @@ static void switch_to_parameters_page(GtkWidget *button, GtkWidget *stack) {
 static void switch_to_category_page(GtkWidget *button, GtkWidget *stack) {
     gtk_stack_set_visible_child_name(GTK_STACK(stack), "create_category");
 }
-
+// Create the top bar
 GtkWidget* create_top_bar(GtkWidget *stack) {
 
     GtkWidget *top_bar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -23,7 +23,7 @@ GtkWidget* create_top_bar(GtkWidget *stack) {
     gtk_widget_set_hexpand(buttons_box, TRUE);
     gtk_widget_set_halign(buttons_box, GTK_ALIGN_END); 
     gtk_widget_set_css_classes(buttons_box, (const char*[]){"top-bar", NULL}); 
-    
+    // icons buttons
     GtkWidget *server_button = gtk_button_new();
     GtkWidget *server_icon = gtk_image_new_from_file("CLIENT/media/icons/server.png");
     gtk_button_set_child(GTK_BUTTON(server_button), server_icon);
@@ -36,9 +36,9 @@ GtkWidget* create_top_bar(GtkWidget *stack) {
     GtkWidget *channel_icon = gtk_image_new_from_file("CLIENT/media/icons/channel.png");
     gtk_button_set_child(GTK_BUTTON(channel_button), channel_icon);
     
-    gtk_widget_set_css_classes(server_button, (const char*[]){"icon-button", NULL});
-    gtk_widget_set_css_classes(category_icon_button, (const char*[]){"icon-button", NULL});
-    gtk_widget_set_css_classes(channel_button, (const char*[]){"icon-button", NULL});
+    gtk_widget_set_css_classes(server_button, (const char*[]){"topbar-icon-button", NULL});
+    gtk_widget_set_css_classes(category_icon_button, (const char*[]){"topbar-icon-button", NULL});
+    gtk_widget_set_css_classes(channel_button, (const char*[]){"topbar-icon-button", NULL});
     
     g_signal_connect(server_button, "clicked", G_CALLBACK(switch_to_server_page), stack);
     g_signal_connect(category_icon_button, "clicked", G_CALLBACK(switch_to_category_page), stack);
