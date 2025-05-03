@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "logic/mainapp/InputValidation.h"
 
-// Function to populate category dropdown
+// Populate category dropdown
 void populate_category_dropdown(GtkDropDown *dropdown) {
 
     GtkStringList *string_list = gtk_string_list_new(NULL);
@@ -15,7 +15,7 @@ void populate_category_dropdown(GtkDropDown *dropdown) {
     gtk_drop_down_set_model(dropdown, G_LIST_MODEL(string_list));
 }
 
-// Function to delete the selected category
+// Delete the selected category
 void delete_selected_category(GtkWidget *button, GtkDropDown *drop_down) {
     guint selected_index = gtk_drop_down_get_selected(drop_down);
     GtkStringObject *selected_item = GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(drop_down));

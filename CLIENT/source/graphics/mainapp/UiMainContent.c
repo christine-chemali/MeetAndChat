@@ -10,16 +10,19 @@
 #include "graphics/mainapp/UiNetwork.h"
 #include "graphics/mainapp/UiNotification.h"
 
-// Display channels
+
+// Display channels and messages
 void display_channels_for_server(const char *server_name, AppData *data) {
-    GtkWidget *existing_page = gtk_stack_get_child_by_name(GTK_STACK(data->stack), server_name);
+    const char *page_name = (strcmp(server_name, "Messages") == 0) ? "messages_window" : server_name;
+    
+    GtkWidget *existing_page = gtk_stack_get_child_by_name(GTK_STACK(data->stack), page_name);
     if (existing_page) {
         gtk_stack_set_visible_child(GTK_STACK(data->stack), existing_page);
         return;
     }
 
     if (strcmp(server_name, "Messages") == 0) {
-        display_messages(GTK_STACK(data->stack), server_name);
+        display_messages(GTK_STACK(data->stack));
     } else {
         display_channels(GTK_STACK(data->stack), server_name);
     }
@@ -83,7 +86,6 @@ void show_first_main_content(GtkWidget *stack, GCallback return_to_login_callbac
     GtkWidget *network_icon = gtk_image_new_from_file("CLIENT/media/icons/network.png");
     gtk_button_set_child(GTK_BUTTON(network_button), network_icon); 
     gtk_image_set_pixel_size(GTK_IMAGE(network_icon), 25); 
-    /*g_signal_connect(network_button, "clicked", G_CALLBACK(return_to_login_callback), stack);*/
     g_signal_connect(network_button, "clicked", G_CALLBACK(show_network_content), data);
     gtk_widget_set_css_classes(network_button, (const char *[]){"icon-button", NULL});
     gtk_box_append(GTK_BOX(data->left_box), network_button);
@@ -94,7 +96,7 @@ void show_first_main_content(GtkWidget *stack, GCallback return_to_login_callbac
     
     gtk_widget_set_margin_start(scrolled_window, 10);
     gtk_widget_set_css_classes(scrolled_window, (const char*[]){"channel-area", NULL});
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC); 
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window), GTK_POLICY_NEVER, GTK_POLICY_NEVER); //changed automatic for never
     gtk_widget_set_hexpand(scrolled_window, TRUE); 
     gtk_widget_set_vexpand(scrolled_window, TRUE); 
 

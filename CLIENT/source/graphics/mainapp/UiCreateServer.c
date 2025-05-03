@@ -69,7 +69,7 @@ void show_create_server_content(GtkWidget *stack, GCallback return_to_main_callb
     
     //button
     GtkWidget *create_server_button = gtk_button_new_with_label("LAUNCH THE NEW SERVER");
-   // g_signal_connect(create_server_button, "clicked", G_CALLBACK(show_parameters), stack); //change the function
+   // g_signal_connect(create_server_button, "clicked", G_CALLBACK(show_parameters), stack); //TODO : change the function
     gtk_widget_set_css_classes(create_server_button,(const char *[]){"custom-button", NULL});
     gtk_widget_set_margin_top(create_server_button, 5);
     gtk_box_append(GTK_BOX(parameter_container), create_server_button);

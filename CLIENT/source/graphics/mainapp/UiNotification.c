@@ -2,6 +2,7 @@
 #include "graphics/mainapp/UiNotification.h"
 #include "graphics/utils/BottomBar.h"
 
+// Create notification content window
 void show_notification_content(GtkWidget *stack, GCallback return_to_main_callback) {
     // main box
     GtkWidget *notification_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);

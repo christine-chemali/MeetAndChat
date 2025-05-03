@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include "logic/mainapp/InputValidation.h"
 
+// Rules to validate channel name
 bool validate_channel_name(const char *channel_name) {
     if (channel_name == NULL || strlen(channel_name) == 0) {
         return false;
@@ -22,7 +23,6 @@ bool validate_channel_name(const char *channel_name) {
 
     return has_non_space;
 }
-
 
 // Rules to validate the category name
 bool validate_category_name(const char *category_name) {

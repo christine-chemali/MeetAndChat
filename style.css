@@ -147,3 +147,7 @@ button {
     border-radius: 50%;
     background: var(--button-bg-hover);
 }
+.fixed-top-box{
+    background: var(--button-bg-hover);
+    border: 1px solid grey;
+}

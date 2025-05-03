@@ -23,6 +23,7 @@ GtkWidget* create_top_bar(GtkWidget *stack) {
     gtk_widget_set_hexpand(buttons_box, TRUE);
     gtk_widget_set_halign(buttons_box, GTK_ALIGN_END); 
     gtk_widget_set_css_classes(buttons_box, (const char*[]){"top-bar", NULL}); 
+    
     // icons buttons
     GtkWidget *server_button = gtk_button_new();
     GtkWidget *server_icon = gtk_image_new_from_file("CLIENT/media/icons/server.png");
@@ -36,16 +37,19 @@ GtkWidget* create_top_bar(GtkWidget *stack) {
     GtkWidget *channel_icon = gtk_image_new_from_file("CLIENT/media/icons/channel.png");
     gtk_button_set_child(GTK_BUTTON(channel_button), channel_icon);
     
+    //Css 
     gtk_widget_set_css_classes(server_button, (const char*[]){"topbar-icon-button", NULL});
     gtk_widget_set_css_classes(category_icon_button, (const char*[]){"topbar-icon-button", NULL});
     gtk_widget_set_css_classes(channel_button, (const char*[]){"topbar-icon-button", NULL});
     
+    //Button connections
     g_signal_connect(server_button, "clicked", G_CALLBACK(switch_to_server_page), stack);
     g_signal_connect(category_icon_button, "clicked", G_CALLBACK(switch_to_category_page), stack);
     g_signal_connect(channel_button, "clicked", G_CALLBACK(switch_to_parameters_page), stack);
     
     gtk_widget_set_margin_end(buttons_box, 5);
     
+    //Append box
     gtk_box_append(GTK_BOX(buttons_box), server_button);
     gtk_box_append(GTK_BOX(buttons_box), category_icon_button);
     gtk_box_append(GTK_BOX(buttons_box), channel_button);

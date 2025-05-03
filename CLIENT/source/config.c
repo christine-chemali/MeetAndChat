@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+// Config file
 int read_config_file(const char *filename, char *connection_info) {
     FILE *file = fopen(filename, "r");
     if (!file) {

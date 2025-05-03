@@ -121,7 +121,7 @@ void show_create_category_content(GtkWidget *stack, GCallback return_to_main_cal
     GtkWidget *category_dropdown = gtk_drop_down_new(NULL, NULL);
     populate_category_dropdown(GTK_DROP_DOWN(category_dropdown));
 
-    // Uncomment the thread to fetch channels from the server
+    //TODO: Uncomment the thread to fetch channels from the server
     //g_thread_new("fetch_channels_thread", fetch_channels, category_dropdown);
 
     //Delete category button

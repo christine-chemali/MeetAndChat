@@ -45,6 +45,7 @@ GtkWidget *create_bottom_bar(GtkWidget *stack, GCallback return_to_login_callbac
     g_signal_connect(return_link, "clicked", G_CALLBACK(on_disconnect_button_clicked), stack);
     gtk_widget_set_css_classes(return_link, (const char *[]){"disconnect-button", NULL});
 
+    //Append box
     gtk_box_append(GTK_BOX(bottom_bar), home_button);
     gtk_box_append(GTK_BOX(bottom_bar), notification_button);
     gtk_box_append(GTK_BOX(bottom_bar), user_button);
