@@ -72,9 +72,6 @@ void show_server_parameters_content(GtkWidget *stack, GCallback return_to_main_c
     GtkWidget *channel_dropdown = gtk_drop_down_new(NULL, NULL);
     populate_channel_dropdown(GTK_DROP_DOWN(channel_dropdown));
 
-    // Uncomment the thread to fetch channels from the server
-   // g_thread_new("fetch_channels_thread", fetch_channels, channel_dropdown);
-
     //Create a channel entry
     GtkWidget *create_channel_entry = gtk_entry_new();
     gtk_widget_set_size_request(create_channel_entry, 200, -1);

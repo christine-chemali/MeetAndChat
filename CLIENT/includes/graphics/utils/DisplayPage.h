@@ -6,10 +6,10 @@
 // Display user page
 void show_user(GtkWidget *widget, gpointer stack);
 
-// Display user page
+// Display create server page
 void show_create(GtkWidget *widget, gpointer stack);
 
-// Display user page
+// Display notification page
 void show_notification(GtkWidget *widget, gpointer stack);
 
 // Display main interface

@@ -1,7 +1,7 @@
 #include <gtk/gtk.h>
 #include "graphics/utils/Utils.h"
 
-// had to change for future action connect database
+// Func to handle forgot password case
 static void handle_forgot_password(GtkWidget *widget, gpointer data)
 {
     GtkWidget *stack = GTK_WIDGET(data);

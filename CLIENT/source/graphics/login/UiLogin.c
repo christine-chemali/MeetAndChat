@@ -56,12 +56,12 @@ void create_login_interface(GtkWidget *stack) {
 
     GtkWidget *title_label = gtk_label_new("WELCOME BACK!");
     gtk_widget_set_halign(title_label, GTK_ALIGN_START);
-    gtk_widget_set_css_classes(title_label, (const char *[]){"custom-title", NULL}); //css
+    gtk_widget_set_css_classes(title_label, (const char *[]){"custom-title", NULL}); 
     gtk_widget_set_margin_top(title_label, 0);
 
     GtkWidget *text_label = gtk_label_new("We're happy to see you again :)");
     gtk_widget_set_halign(text_label, GTK_ALIGN_START);
-    gtk_widget_set_css_classes(text_label, (const char *[]){"custom-text", NULL}); //css
+    gtk_widget_set_css_classes(text_label, (const char *[]){"custom-text", NULL}); 
     gtk_widget_set_margin_top(text_label, 0);
     gtk_widget_set_margin_bottom(text_label, 10);
 
@@ -81,7 +81,7 @@ void create_login_interface(GtkWidget *stack) {
     GtkWidget *create_account_link = gtk_button_new_with_label("CREATE AN ACCOUNT");
     gtk_widget_set_halign(create_account_link, GTK_ALIGN_CENTER);
     gtk_widget_set_margin_top(create_account_link, 0);
-    gtk_widget_set_css_classes(create_account_link, (const char *[]){"link-account-button", NULL});//css
+    gtk_widget_set_css_classes(create_account_link, (const char *[]){"link-account-button", NULL});
     
     g_signal_connect(create_account_link, "clicked", G_CALLBACK(show_create_account), stack);
     gtk_box_append(GTK_BOX(create_account_container), small_text_label);
@@ -103,11 +103,11 @@ void create_login_interface(GtkWidget *stack) {
 
     GtkWidget *username_label = gtk_label_new("Email*");
     gtk_widget_set_halign(username_label, GTK_ALIGN_START);
-    gtk_widget_set_css_classes(username_label, (const char *[]){"custom-label", NULL}); // css
+    gtk_widget_set_css_classes(username_label, (const char *[]){"custom-label", NULL}); 
 
     GtkWidget *username_entry = gtk_entry_new();
     gtk_widget_set_size_request(username_entry, 200, -1);
-    gtk_widget_set_css_classes(username_entry, (const char *[]){"custom-entry", NULL}); // css
+    gtk_widget_set_css_classes(username_entry, (const char *[]){"custom-entry", NULL});
     gtk_widget_set_margin_bottom(username_entry, 8);
 
     gtk_box_append(GTK_BOX(username_container), username_label);
@@ -120,17 +120,17 @@ void create_login_interface(GtkWidget *stack) {
 
     GtkWidget *password_label = gtk_label_new("Password*");
     gtk_widget_set_halign(password_label, GTK_ALIGN_START);
-    gtk_widget_set_css_classes(password_label, (const char *[]){"custom-label", NULL}); // css
+    gtk_widget_set_css_classes(password_label, (const char *[]){"custom-label", NULL}); 
 
     GtkWidget *password_entry = gtk_entry_new(); 
     gtk_entry_set_visibility(GTK_ENTRY(password_entry), FALSE);
     gtk_widget_set_size_request(password_entry, 200, -1);
-    gtk_widget_set_css_classes(password_entry, (const char *[]){"custom-entry", NULL}); // css
+    gtk_widget_set_css_classes(password_entry, (const char *[]){"custom-entry", NULL}); 
 
     GtkWidget *show_password_check = gtk_check_button_new_with_label("Show");
     gtk_widget_set_halign(show_password_check, GTK_ALIGN_END);
     g_signal_connect(show_password_check, "toggled", G_CALLBACK(toggle_passwordVisibility), password_entry);
-    gtk_widget_set_css_classes(show_password_check, (const char *[]){"custom-checkbox", NULL}); // css
+    gtk_widget_set_css_classes(show_password_check, (const char *[]){"custom-checkbox", NULL}); 
 
     GtkWidget *password_label_checkbox_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     gtk_box_set_spacing(GTK_BOX(password_label_checkbox_box), 115); 
@@ -139,7 +139,7 @@ void create_login_interface(GtkWidget *stack) {
 
     GtkWidget *forgot_password_link = gtk_button_new_with_label("Forgot your password?");
     gtk_widget_set_halign(forgot_password_link, GTK_ALIGN_END);
-    gtk_widget_set_css_classes(forgot_password_link, (const char *[]){"link-button", NULL}); // css
+    gtk_widget_set_css_classes(forgot_password_link, (const char *[]){"link-button", NULL}); 
     g_signal_connect(forgot_password_link, "clicked", G_CALLBACK(show_forgot_password), stack);
 
     gtk_box_append(GTK_BOX(password_container), password_label_checkbox_box);
@@ -152,7 +152,7 @@ void create_login_interface(GtkWidget *stack) {
     gtk_widget_set_halign(login_button, GTK_ALIGN_CENTER);
     gtk_widget_set_margin_top(login_button, 5);
 
-    gtk_widget_set_css_classes(login_button, (const char *[]){"custom-button", NULL});//css
+    gtk_widget_set_css_classes(login_button, (const char *[]){"custom-button", NULL});
     g_signal_connect(login_button, "clicked", G_CALLBACK(show_main_content), stack);
 
     // Add container to main box
@@ -179,8 +179,8 @@ activate(GtkApplication *app, gpointer user_data)
     GtkWidget *stack = gtk_stack_new();
     gtk_window_set_child(GTK_WINDOW(window), stack);
 
-    const char *window_classes[] = {"window", NULL};//css
-    gtk_widget_set_css_classes(window, window_classes);//css
+    const char *window_classes[] = {"window", NULL};
+    gtk_widget_set_css_classes(window, window_classes);
    
     AppData *data = malloc(sizeof(AppData));    
         if (!data) {        
@@ -190,7 +190,6 @@ activate(GtkApplication *app, gpointer user_data)
 
     data->left_box = NULL;     
     data->stack = stack;     
-    data->servers = NULL;    
     
     connect_window_destroy_signal(window, data);
 

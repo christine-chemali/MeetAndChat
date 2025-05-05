@@ -31,19 +31,15 @@ static void on_user_button_clicked(GtkButton *button, const char *username) {
 
 // When send button is clicked
 static void on_send_message(GtkButton *button, GtkEntry *entry) {
-    // Cast GtkEntry to GtkEditable and get the text from the entry widget
-    const char *message = gtk_editable_get_text(GTK_EDITABLE(entry));
-
+    const char* message = gtk_editable_get_text(GTK_EDITABLE(entry));
     if (message && *message) {
-        char log_message[512];
-        snprintf(log_message, sizeof(log_message), "Sending message from UI: %s", message);
-        log_client_message(LOG_DEBUG, log_message);
-        
-        // Send the message
-        send_message("current_user", message);
-        
-        // Clear the entry 
-        gtk_editable_set_text(GTK_EDITABLE(entry), "");
+        if (send_chat_message("current_user", message)) {
+            // Message sent successfully
+            gtk_editable_set_text(GTK_EDITABLE(entry), "");
+        } else {
+            // Handle send error
+            log_client_message(LOG_ERROR, "Failed to send message");
+        }
     }
 }
 

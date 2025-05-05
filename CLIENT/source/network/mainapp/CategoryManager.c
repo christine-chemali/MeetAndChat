@@ -28,7 +28,7 @@ void delete_selected_category(GtkWidget *button, GtkDropDown *drop_down) {
     }
 }
 
-// to create a category
+// Create a category
 void handle_create_category(GtkWidget *button, GtkEntry *entry) {
     const char *category_name = gtk_editable_get_text(GTK_EDITABLE(entry));
     

@@ -8,7 +8,6 @@
 typedef struct {
     GtkWidget *left_box;
     GtkWidget *stack;
-    GList *servers; 
 } AppData;
 
 void connect_window_destroy_signal(GtkWidget *window, AppData *data); 

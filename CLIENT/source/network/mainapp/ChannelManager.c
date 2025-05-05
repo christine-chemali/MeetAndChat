@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "logic/mainapp/InputValidation.h"
 
-// Function to populate channel dropdown
+// Populate channel dropdown
 void populate_channel_dropdown(GtkDropDown *dropdown) {
 
     GtkStringList *string_list = gtk_string_list_new(NULL);
@@ -15,7 +15,7 @@ void populate_channel_dropdown(GtkDropDown *dropdown) {
     gtk_drop_down_set_model(dropdown, G_LIST_MODEL(string_list));
 }
 
-// Function to delete the selected channel
+// Delete the selected channel
 void delete_selected_channel(GtkWidget *button, GtkDropDown *drop_down) {
     guint selected_index = gtk_drop_down_get_selected(drop_down);
     GtkStringObject *selected_item = GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(drop_down));
@@ -28,7 +28,7 @@ void delete_selected_channel(GtkWidget *button, GtkDropDown *drop_down) {
     }
 }
 
-// to create a channel
+//Create a channel
 void handle_create_channel(GtkWidget *button, GtkEntry *entry) {
     const char *channel_name = gtk_editable_get_text(GTK_EDITABLE(entry));
     

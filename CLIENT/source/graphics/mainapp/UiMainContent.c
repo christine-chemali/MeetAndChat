@@ -9,6 +9,7 @@
 #include "graphics/utils/DisplayPage.h"
 #include "graphics/mainapp/UiNetwork.h"
 #include "graphics/mainapp/UiNotification.h"
+#include "network/handlenetwork/NetworkHandlers.h"
 
 
 // Display channels and messages
@@ -28,25 +29,27 @@ void display_channels_for_server(const char *server_name, AppData *data) {
     }
 }
 
-// when server or message button clicked
+// Callback function when a server or message button is clicked
 static void on_server_button_clicked(GtkButton *button, AppData *data) {
     const char *button_name = gtk_widget_get_name(GTK_WIDGET(button));
+    
+    // Display channels for the server
     display_channels_for_server(button_name, data);
 }
 
-// To create the main window
+// Function to show the main content after login
 void show_first_main_content(GtkWidget *stack, GCallback return_to_login_callback) {
-    // Main container box
+    // Create main container
     GtkWidget *main_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_margin_top(main_container, 20);
     gtk_widget_set_margin_bottom(main_container, 8);
     gtk_widget_set_margin_start(main_container, 8);
     gtk_widget_set_margin_end(main_container, 0);
 
-    // Left box for servers
+    // Initialize AppData
     AppData *data = malloc(sizeof(AppData));
     if (!data) {
-        g_critical("Impossible to allocate data for AppData");
+        g_critical("Failed to allocate memory for AppData");
         return;
     }
     *data = (AppData){0};
@@ -93,10 +96,10 @@ void show_first_main_content(GtkWidget *stack, GCallback return_to_login_callbac
     // Right area (stack for channels)
     data->stack = gtk_stack_new();
     GtkWidget *scrolled_window = gtk_scrolled_window_new();
-    
+
     gtk_widget_set_margin_start(scrolled_window, 10);
     gtk_widget_set_css_classes(scrolled_window, (const char*[]){"channel-area", NULL});
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window), GTK_POLICY_NEVER, GTK_POLICY_NEVER); //changed automatic for never
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window), GTK_POLICY_NEVER, GTK_POLICY_NEVER);
     gtk_widget_set_hexpand(scrolled_window, TRUE); 
     gtk_widget_set_vexpand(scrolled_window, TRUE); 
 
@@ -112,7 +115,7 @@ void show_first_main_content(GtkWidget *stack, GCallback return_to_login_callbac
     // Add containers to main container
     gtk_box_append(GTK_BOX(main_container), content_box);
 
-    // Here bottom bar
+    // Bottom bar
     GtkWidget *bottom_bar = create_bottom_bar(stack, return_to_login_callback);
     gtk_box_append(GTK_BOX(main_container), bottom_bar);
 

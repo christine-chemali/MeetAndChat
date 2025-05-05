@@ -1,7 +1,7 @@
 #include <gtk/gtk.h>
 #include "graphics/utils/Utils.h"
 
-// had to change for future action with database
+// func to handle create an account
 static void handle_create_account_choice(GtkWidget *widget, gpointer data)
 {
     GtkWidget *stack = GTK_WIDGET(data);
@@ -40,35 +40,35 @@ void show_create_account_content(GtkWidget *stack, GCallback return_to_login_cal
 
     GtkWidget *first_name_label = gtk_label_new("First Name*:");
     gtk_widget_set_halign(first_name_label, GTK_ALIGN_START);
-    gtk_widget_set_css_classes(first_name_label, (const char *[]){"custom-label", NULL});//css
+    gtk_widget_set_css_classes(first_name_label, (const char *[]){"custom-label", NULL});
 
     GtkWidget *first_name_entry = gtk_entry_new();
     gtk_widget_set_size_request(first_name_entry, 200, -1);
-    gtk_widget_set_css_classes(first_name_entry, (const char *[]){"custom-entry",NULL});//css
+    gtk_widget_set_css_classes(first_name_entry, (const char *[]){"custom-entry",NULL});
 
     GtkWidget *last_name_label = gtk_label_new("Last Name*:");
     gtk_widget_set_halign(last_name_label, GTK_ALIGN_START);
-    gtk_widget_set_css_classes(last_name_label, (const char *[]){"custom-label", NULL}); //css
+    gtk_widget_set_css_classes(last_name_label, (const char *[]){"custom-label", NULL}); 
 
     GtkWidget *last_name_entry = gtk_entry_new();
     gtk_widget_set_size_request(last_name_entry, 200, -1);
-    gtk_widget_set_css_classes(last_name_entry, (const char *[]){"custom-entry", NULL});//css
+    gtk_widget_set_css_classes(last_name_entry, (const char *[]){"custom-entry", NULL});
 
     GtkWidget *username_label = gtk_label_new("Username*:");
     gtk_widget_set_halign(username_label, GTK_ALIGN_START);
-    gtk_widget_set_css_classes(username_label, (const char *[]){"custom-label", NULL});//css
+    gtk_widget_set_css_classes(username_label, (const char *[]){"custom-label", NULL});
 
     GtkWidget *username_entry = gtk_entry_new();
     gtk_widget_set_size_request(username_entry, 200, -1);
-    gtk_widget_set_css_classes(username_entry, (const char *[]){"custom-entry", NULL});//css
+    gtk_widget_set_css_classes(username_entry, (const char *[]){"custom-entry", NULL});
 
     GtkWidget *email_label = gtk_label_new("Email*:");
     gtk_widget_set_halign(email_label, GTK_ALIGN_START);
-    gtk_widget_set_css_classes(email_label, (const char *[]){"custom-label", NULL});//css
+    gtk_widget_set_css_classes(email_label, (const char *[]){"custom-label", NULL});
     
     GtkWidget *email_entry = gtk_entry_new();
     gtk_widget_set_size_request(email_entry, 200, -1);
-    gtk_widget_set_css_classes(email_entry, (const char *[]){"custom-entry", NULL});//css
+    gtk_widget_set_css_classes(email_entry, (const char *[]){"custom-entry", NULL});
 
     gtk_box_append(GTK_BOX(identify_container), first_name_label);
     gtk_box_append(GTK_BOX(identify_container), first_name_entry);
@@ -86,30 +86,30 @@ void show_create_account_content(GtkWidget *stack, GCallback return_to_login_cal
 
     GtkWidget *account_password_label = gtk_label_new("Password*:");
     gtk_widget_set_halign(account_password_label, GTK_ALIGN_START);
-    gtk_widget_set_css_classes(account_password_label, (const char *[]){"custom-label", NULL}); // css
+    gtk_widget_set_css_classes(account_password_label, (const char *[]){"custom-label", NULL}); 
 
     GtkWidget *account_password_entry = gtk_entry_new(); 
     gtk_entry_set_visibility(GTK_ENTRY(account_password_entry), FALSE);
     gtk_widget_set_size_request(account_password_entry, 200, -1);
-    gtk_widget_set_css_classes(account_password_entry, (const char *[]){"custom-entry", NULL}); // css
+    gtk_widget_set_css_classes(account_password_entry, (const char *[]){"custom-entry", NULL}); 
 
     GtkWidget *password_label_checkbox_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     gtk_box_set_spacing(GTK_BOX(password_label_checkbox_box), 115); 
 
     GtkWidget *account_retype_password_label = gtk_label_new("Re-type password*:");
     gtk_widget_set_halign(account_retype_password_label, GTK_ALIGN_START);
-    gtk_widget_set_css_classes(account_retype_password_label, (const char *[]){"custom-label", NULL}); // css
+    gtk_widget_set_css_classes(account_retype_password_label, (const char *[]){"custom-label", NULL}); 
 
     GtkWidget *retype_password_entry = gtk_entry_new();
     gtk_entry_set_visibility(GTK_ENTRY(retype_password_entry), FALSE);
     gtk_widget_set_size_request(retype_password_entry, 200, -1);
-    gtk_widget_set_css_classes(retype_password_entry, (const char *[]){"custom-entry", NULL}); // css
+    gtk_widget_set_css_classes(retype_password_entry, (const char *[]){"custom-entry", NULL}); 
 
     GtkWidget *show_account_password_check = gtk_check_button_new_with_label("Show");
     gtk_widget_set_halign(show_account_password_check, GTK_ALIGN_END);
     g_signal_connect(show_account_password_check, "toggled", G_CALLBACK(toggle_passwordVisibility), account_password_entry);
     g_signal_connect(show_account_password_check, "toggled", G_CALLBACK(toggle_passwordVisibility), retype_password_entry);
-    gtk_widget_set_css_classes(show_account_password_check, (const char *[]){"custom-checkbox", NULL}); // css
+    gtk_widget_set_css_classes(show_account_password_check, (const char *[]){"custom-checkbox", NULL}); 
 
     gtk_box_append(GTK_BOX(password_label_checkbox_box), account_password_label);
     gtk_box_append(GTK_BOX(password_label_checkbox_box), show_account_password_check);
@@ -126,23 +126,23 @@ void show_create_account_content(GtkWidget *stack, GCallback return_to_login_cal
 
     GtkWidget *recover_label = gtk_label_new("To recover your account, please answer:");
     gtk_widget_set_halign(recover_label, GTK_ALIGN_START);
-    gtk_widget_set_css_classes(recover_label, (const char *[]){"custom-label", NULL}); // css
+    gtk_widget_set_css_classes(recover_label, (const char *[]){"custom-label", NULL}); 
 
     GtkWidget *recover_first_question_label = gtk_label_new("What is your favorite cartoon character*?");
     gtk_widget_set_halign(recover_first_question_label, GTK_ALIGN_START);
-    gtk_widget_set_css_classes(recover_first_question_label, (const char *[]){"custom-label", NULL}); // css
+    gtk_widget_set_css_classes(recover_first_question_label, (const char *[]){"custom-label", NULL}); 
 
     GtkWidget *first_question_entry = gtk_entry_new();
     gtk_widget_set_size_request(first_question_entry, 200, -1);
-    gtk_widget_set_css_classes(first_question_entry, (const char *[]){"custom-entry", NULL}); // css
+    gtk_widget_set_css_classes(first_question_entry, (const char *[]){"custom-entry", NULL}); 
 
     GtkWidget *recover_second_question_label = gtk_label_new("What is the weirdest food you've eaten*?");
     gtk_widget_set_halign(recover_second_question_label, GTK_ALIGN_START);
-    gtk_widget_set_css_classes(recover_second_question_label, (const char *[]){"custom-label", NULL}); // css
+    gtk_widget_set_css_classes(recover_second_question_label, (const char *[]){"custom-label", NULL}); 
 
     GtkWidget *second_question_entry = gtk_entry_new();
     gtk_widget_set_size_request(second_question_entry, 200, -1);
-    gtk_widget_set_css_classes(second_question_entry, (const char *[]){"custom-entry", NULL}); // css
+    gtk_widget_set_css_classes(second_question_entry, (const char *[]){"custom-entry", NULL}); 
 
     gtk_box_append(GTK_BOX(recover_container), recover_label);
     gtk_box_append(GTK_BOX(recover_container), recover_first_question_label);
@@ -157,12 +157,12 @@ void show_create_account_content(GtkWidget *stack, GCallback return_to_login_cal
 
     GtkWidget *confirm_button = gtk_button_new_with_label("REGISTER");
     g_signal_connect(confirm_button, "clicked", G_CALLBACK(handle_create_account_choice), stack);
-    gtk_widget_set_css_classes(confirm_button, (const char *[]){"custom-button", NULL}); //css
+    gtk_widget_set_css_classes(confirm_button, (const char *[]){"custom-button", NULL}); 
     gtk_widget_set_margin_top(confirm_button, 5);
 
     GtkWidget *return_link = gtk_button_new_with_label("Return to Login");
     g_signal_connect(return_link, "clicked", return_to_login_callback, stack);
-    gtk_widget_set_css_classes(return_link,(const char *[]){"link-account-button", NULL}); //css
+    gtk_widget_set_css_classes(return_link,(const char *[]){"link-account-button", NULL}); 
     gtk_widget_set_margin_top(return_link, 5);
 
     gtk_box_append(GTK_BOX(action_button_container), confirm_button);
