@@ -20,7 +20,11 @@
     color: var(--main-font-color);
     border: var(--border);
 }
-
+.dialog_box {
+    border-radius: 10px;
+    background-color: var(--page-background-color);
+    border: var(--border);
+}
 headerbar {
     background: var(--main-background-color);
  }
@@ -68,18 +72,19 @@ button {
 .custom-checkbox{
     color: var(--main-font-color); 
 }
-.custom-button{
+.custom-button, .ok-custom-button {
     background: var(--button-bg-color);
     color: var(--button-text-color);
     font-weight: bold;
     border: var(--border);
 }
-.custom-button:hover{
+.custom-button:hover,  .ok-custom-button:hover{
     background: var(--button-bg-hover);
     color: var(--main-font-color);
     font-weight: bold;
     border: var(--button-hover-border);
 }
+
 .small-custom-text {
     font-weight: bold;
 }

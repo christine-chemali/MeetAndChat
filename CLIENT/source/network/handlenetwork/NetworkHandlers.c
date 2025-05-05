@@ -343,9 +343,27 @@ void update_user_status(const char* username, bool is_online) {
     send_message_to_server(&msg);
 }
 
-//Callback for login response
-static void handle_login_response(Message* msg) {    
-    // Parse login response and update UI accordingly    
+//Handle login response
+static void handle_login_response(Message* msg) {
+    bool success = false;
+    char message[256] = {0};
+    
+    //in case of parsing error
+    if (sscanf(msg->data, "%d:%[^\n]", &success, message) != 2) {
+        success = false;
+        strncpy(message, "Invalid server response", sizeof(message) - 1);
+        log_client_message(LOG_ERROR, "Invalid login response from server");
+    }
+    
+    // Call callback in the principal thread
+    log_client_message(LOG_INFO, "Received login response from server");
+    g_idle_add((GSourceFunc)on_login_response, g_memdup2(&(struct {
+        bool success;
+        char message[256];
+    }){success, {0}}, sizeof(struct {
+        bool success;
+        char message[256];
+    })));
 }
 
 //Callback for fetch message response
