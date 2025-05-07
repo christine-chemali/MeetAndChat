@@ -20,7 +20,7 @@ gboolean show_main_content(gpointer stack) {
     return G_SOURCE_REMOVE;
 }
 
-// Callback login avec gestion d'erreur améliorée
+// Callback login handles errors
 void on_login_response(bool success, const char* message) {
     if (success) {
         log_client_message(LOG_INFO, "Login successful");
@@ -34,7 +34,7 @@ void on_login_response(bool success, const char* message) {
     }
 }
 
-// Callback pour les messages reçus
+// Callback for received messages
 void on_message_received(const char* username, const char* message) {
     log_client_message(LOG_INFO, "Message received");
     // Implémentation à venir pour l'interface de chat
@@ -42,15 +42,15 @@ void on_message_received(const char* username, const char* message) {
                g_strdup_printf("New message from %s", username));
 }
 
-// Callback pour l'historique des messages
+// Callback for message history
 void on_history_received(const char* username, const char** messages, int count) {
     log_client_message(LOG_INFO, "History received");
-    // Implémentation à venir pour l'affichage de l'historique
+    // TODO implement
     g_idle_add((GSourceFunc)show_custom_dialog, 
                g_strdup_printf("Received %d messages from history", count));
 }
 
-// Callback pour les changements de statut utilisateur
+// Callback to change users status
 void on_user_status_changed(const char* username, bool is_online) {
     log_client_message(LOG_INFO, "User status changed");
     char* status_message = g_strdup_printf("User %s is now %s", 
@@ -59,7 +59,7 @@ void on_user_status_changed(const char* username, bool is_online) {
     g_idle_add((GSourceFunc)show_custom_dialog, status_message);
 }
 
-// Callback pour la réponse d'enregistrement
+// Callback for register response
 void on_register_response(bool success, const char* message) {
     log_client_message(LOG_INFO, "Register response received");
     if (success) {

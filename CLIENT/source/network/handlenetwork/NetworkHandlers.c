@@ -13,6 +13,7 @@
 static void handle_login_response(Message* msg);
 static void handle_message_response(Message* msg);
 static void handle_fetch_messages_response(Message* msg);
+static void handle_register_response(Message* msg);
 
 //Global variables for network management 
 SOCKET clientSocket = INVALID_SOCKET;
@@ -35,7 +36,7 @@ static DWORD WINAPI network_receive_thread(LPVOID lpParam) {
         decrypt_message(&msg, get_session_key());
 
         switch (msg.type) {
-            case LOGIN_RESPONSE:
+            case LOGIN_RESPONSE: // login response type 6
                 handle_login_response(&msg);
                 break;
                 
@@ -67,7 +68,11 @@ static DWORD WINAPI network_receive_thread(LPVOID lpParam) {
                 
             case HEARTBEAT:
                 break;
-                
+
+            case REGISTER_RESPONSE: //create account response type 17 
+                handle_register_response(&msg);
+                break;
+
             default:
                 // Handle unknown message type
                 printf("Unknown message type received: %d\n", msg.type);
@@ -296,14 +301,6 @@ void subscribe_to_messages(const char* username) {
     msg.length = strlen(msg.data);
     send_message_to_server(&msg);
 }
-//Send registration request 
-bool send_register_request(const char* username, const char* password) {
-    Message msg;
-    msg.type = REGISTER_REQUEST;
-    snprintf(msg.data, sizeof(msg.data), "%s:%s", username, password);
-    msg.length = strlen(msg.data);
-    return send_message_to_server(&msg);
-}
 
 //Send logout request 
 bool send_logout_request(void) {
@@ -369,4 +366,43 @@ static void handle_login_response(Message* msg) {
 //Callback for fetch message response
 static void handle_fetch_messages_response(Message* msg) {   
     // Parse and handle fetched messages    
+}
+
+//Send for account creation (uicreateaccount)
+bool send_registration_request(const char *first_name, const char *last_name, 
+    const char *username, const char *email, 
+    const char *password, const char *first_question, 
+    const char *second_question) {
+Message msg;
+msg.type = REGISTER_REQUEST; //register_request type 2 in Message.h
+
+snprintf(msg.data, MAX_MESSAGE_LENGTH, "%s|%s|%s|%s|%s|%s|%s",
+first_name, last_name, username, email, 
+password, first_question, second_question);
+
+msg.length = strlen(msg.data);
+msg.checksum = calculate_checksum(msg.data, msg.length);
+
+return send_message_to_server(&msg);  
+}
+
+//treatment of creation account response (uicreateaccount)
+static void handle_register_response(Message* msg) {
+    bool success = false;
+    char message[256] = {0};
+    
+    if (sscanf(msg->data, "%d:%[^\n]", &success, message) != 2) {
+        success = false;
+        strncpy(message, "Invalid server response", sizeof(message) - 1);
+        log_client_message(LOG_ERROR, "Invalid registration response from server");
+    }
+    
+    log_client_message(LOG_INFO, "Received registration response from server");
+    g_idle_add((GSourceFunc)on_register_response, g_memdup2(&(struct {
+        bool success;
+        char message[256];
+    }){success, {0}}, sizeof(struct {
+        bool success;
+        char message[256];
+    })));
 }

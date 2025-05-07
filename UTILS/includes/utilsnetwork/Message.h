@@ -20,6 +20,7 @@
 #define CONNECTION_ERROR 14
 #define RECONNECT_REQUEST 15
 #define KEY_ROTATION_REQUEST 16
+#define REGISTER_RESPONSE 17
 
 // Define the structure of a Message
 typedef struct {

@@ -10,10 +10,9 @@
 
 //Network config constants 
 #define CONNECTION_TIMEOUT 30        // Connection timeout in seconds
-#define MAX_RECONNECT_ATTEMPTS 5     // Maximum number of reconnection attempts
+#define MAX_RECONNECT_ATTEMPTS 3     // Maximum number of reconnection attempts
 #define HEARTBEAT_INTERVAL 30        // Heartbeat interval in seconds
 #define MAX_ADDRESS_LENGTH 128       // Maximum length for server address
-#define REGISTER_RESPONSE 9
 #define USER_LIST_REQUEST 10
 #define USER_LIST_RESPONSE 11
 #define LOGOUT_REQUEST 13
@@ -70,5 +69,11 @@ void on_register_response(bool success, const char* message);
 //Thread function prototypes 
 static DWORD WINAPI network_receive_thread(LPVOID lpParam);
 static DWORD WINAPI heartbeat_thread(LPVOID lpParam);
+
+//Registration request (uicreateaccount)
+bool send_registration_request(const char *first_name, const char *last_name, 
+    const char *username, const char *email, 
+    const char *password, const char *first_question, 
+    const char *second_question);
 
 #endif 
