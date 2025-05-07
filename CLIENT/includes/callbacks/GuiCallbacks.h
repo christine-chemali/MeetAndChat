@@ -1,19 +1,18 @@
-#ifndef GUICALLBACKS_H
-#define GUICALLBACKS_H
+#ifndef GUI_CALLBACKS_H
+#define GUI_CALLBACKS_H
 
-#include <stdbool.h>
 #include <gtk/gtk.h>
+#include <stdbool.h>
 
-// Message handling callbacks
-void on_message_received(const char* username, const char* message);
-void on_history_received(const char* username, const char** messages, int count);
-
-// User management callbacks
+// Stack management
 void set_gui_stack(GtkWidget *stack);
 gboolean show_main_content(gpointer stack);
-void on_user_status_changed(const char* username, bool is_online);
+
+// Network response callbacks
 void on_login_response(bool success, const char* message);
 void on_register_response(bool success, const char* message);
-void set_gui_stack(GtkWidget *stack);
+void on_message_received(const char* username, const char* message);
+void on_history_received(const char* username, const char** messages, int count);
+void on_user_status_changed(const char* username, bool is_online);
 
 #endif

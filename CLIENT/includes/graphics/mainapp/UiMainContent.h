@@ -1,5 +1,5 @@
-#ifndef UIFORGOTEMAIL_H
-#define UIFORGOTEMAIL_H
+#ifndef UIMAINCONTENT_H
+#define UIMAINCONTENT_H
 
 #include <gtk/gtk.h>
 

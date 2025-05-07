@@ -1,115 +1,18 @@
 #include <gtk/gtk.h>
-#include "network/handlenetwork/NetworkHandlers.h"
-#include "graphics/login/UiCreateAccount.h"
-#include "graphics/mainapp/UiMainContent.h"
-#include "graphics/login/UiForgotPassword.h"
+#include "graphics/login/UiLogin.h"
+#include "callbacks/LoginCallbacks.h"
 #include "graphics/utils/CssLoading.h"
 #include "graphics/utils/Utils.h"
 #include "graphics/utils/AppData.h"
-#include "logic/login/ValidationProcess.h"
 #include "callbacks/GuiCallbacks.h"
+#include "network/log/ClientLogging.h"
+#include "graphics/login/UiCreateAccount.h"
+#include "graphics/login/UiForgotPassword.h"
+#include "graphics/mainapp/UiMainContent.h"
 
-// struct to stock necessary widgets
-typedef struct {
-    GtkEntry *username_entry;
-    GtkEntry *password_entry;
-    GtkStack *stack;
-} LoginData;
-
-// Send login request when login button is clicked
-static void on_login_button_clicked(GtkButton *button, LoginData *data) {
-
-    const char *username = gtk_editable_get_text(GTK_EDITABLE(data->username_entry));
-    const char *password = gtk_editable_get_text(GTK_EDITABLE(data->password_entry));
-
-    // handle network connection errors
-    if (!isConnected) {
-        log_client_message(LOG_ERROR, "Not connected to server");
-        show_custom_dialog("Error", "Not connected to server");
-        return;
-    }
-
-    // Verify if entry are empty
-    if (strlen(username) == 0 || strlen(password) == 0) {
-        log_client_message(LOG_WARNING, "Login fields are empty");
-        show_custom_dialog("Error", "Please fill in all fields");
-        return;
-    }
-
-    // Validate email
-    if (!validate_email(username)) {
-        log_client_message(LOG_WARNING, "Invalid email format");
-        show_custom_dialog("Error", "Invalid email format");
-        return;
-    }
-
-    // Validate password
-    if (!validate_password(password)) {
-        log_client_message(LOG_WARNING, "Invalid password format");
-        show_custom_dialog("Error", "Password must be at least\n10 characters long\nand contain uppercase, lowercase,\nnumber and special character");
-        return;
-    }
-
-    // Send request only if validation are ok
-    log_client_message(LOG_INFO, "Sending login request");
-    if (!send_login_request(username, password)) {
-        show_custom_dialog("Error", "Failed to send login request");
-        return;
-    }
-}
-
-//Display Create an account page
-static void
-show_create_account(GtkWidget *widget, gpointer stack)
-{
-    log_client_message(LOG_INFO, "Displaying create account page");
-    gtk_stack_set_visible_child_name(GTK_STACK(stack), "create_account");
-}
-
-//Display forgotten password page
-static void
-show_forgot_password(GtkWidget *widget, gpointer stack)
-{
-    log_client_message(LOG_INFO, "Displaying forgot password page");
-    gtk_stack_set_visible_child_name(GTK_STACK(stack), "forgot_password");
-}
-
-//Display first main content 
-static gboolean
-local_show_main_content(GtkWidget *widget, gpointer stack)
-{
-    log_client_message(LOG_INFO, "Displaying home content page");
-    gtk_stack_set_visible_child_name(GTK_STACK(stack), "main_window");
-    return TRUE;
-}
-
-//Display login interface
-static void
-show_login(GtkWidget *widget, gpointer stack)
-{
-    log_client_message(LOG_INFO, "Displaying login interface");
-    gtk_stack_set_visible_child_name(GTK_STACK(stack), "login");
-}
-
-//Disconnect
-void on_disconnect_button_clicked(GtkWidget *widget, gpointer stack) {
-    log_client_message(LOG_INFO, "Disconnecting from server");
-    send_logout_request();
-    show_login(widget, stack); 
-}
-
-// clean login interface
-void cleanup_login_interface(LoginData *data) {
-    log_client_message(LOG_INFO, "Cleaning up login interface");
-    disconnect_from_server();
-    g_free(data);
-}
-
-// Create Elements of the Login page
+// Create the login interface and set up its components
 void create_login_interface(GtkWidget *stack) {
-
     log_client_message(LOG_INFO, "Creating login interface");
-    // Stock callbacks stack
     set_gui_stack(stack); 
 
     GtkWidget *login_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -198,11 +101,11 @@ void create_login_interface(GtkWidget *stack) {
     gtk_widget_set_size_request(password_entry, 200, -1);
     gtk_widget_set_css_classes(password_entry, (const char *[]){"custom-entry", NULL}); 
 
-        //login data struct 
-        LoginData *data = g_new(LoginData, 1);
-        data->username_entry = GTK_ENTRY(username_entry);
-        data->password_entry = GTK_ENTRY(password_entry);
-        data->stack = GTK_STACK(stack);
+    //login data struct 
+    LoginData *data = g_new(LoginData, 1);
+    data->username_entry = GTK_ENTRY(username_entry);
+    data->password_entry = GTK_ENTRY(password_entry);
+    data->stack = GTK_STACK(stack);
 
     GtkWidget *show_password_check = gtk_check_button_new_with_label("Show");
     gtk_widget_set_halign(show_password_check, GTK_ALIGN_END);
@@ -231,7 +134,6 @@ void create_login_interface(GtkWidget *stack) {
 
     gtk_widget_set_css_classes(login_button, (const char *[]){"custom-button", NULL});
     g_signal_connect(login_button, "clicked", G_CALLBACK(on_login_button_clicked), data);
-    /*g_signal_connect(login_button, "clicked", G_CALLBACK(show_main_content), stack);*/
 
     // Add container to main box
     gtk_box_append(GTK_BOX(login_box), logo_icon);
@@ -245,10 +147,8 @@ void create_login_interface(GtkWidget *stack) {
     log_client_message(LOG_INFO, "Login interface created");
 }
 
-//Initialize the main app window 
-void
-activate(GtkApplication *app, gpointer user_data)
-{
+// Activate the application, creating the main window and initializing components
+void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "MEET & CHAT");
     gtk_window_set_default_size(GTK_WINDOW(window), 360, 640);
@@ -262,9 +162,9 @@ activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_css_classes(window, window_classes);
    
     AppData *data = malloc(sizeof(AppData));    
-        if (!data) {        
-            g_critical("Unable to allocate AppData");       
-             return;    
+    if (!data) {        
+        g_critical("Unable to allocate AppData");       
+        return;    
     } 
 
     data->left_box = NULL;     
@@ -273,7 +173,6 @@ activate(GtkApplication *app, gpointer user_data)
     connect_window_destroy_signal(window, data);
 
     create_login_interface(stack);
-
     show_create_account_content(stack, G_CALLBACK(show_login));   
     show_first_main_content(stack, G_CALLBACK(show_login)); 
     show_forgot_password_content(stack, G_CALLBACK(show_login));
