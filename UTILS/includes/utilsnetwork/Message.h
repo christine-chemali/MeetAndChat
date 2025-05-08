@@ -21,6 +21,7 @@
 #define RECONNECT_REQUEST 15
 #define KEY_ROTATION_REQUEST 16
 #define REGISTER_RESPONSE 17
+#define USER_LIST_REQUEST 18
 
 // Define the structure of a Message
 typedef struct {

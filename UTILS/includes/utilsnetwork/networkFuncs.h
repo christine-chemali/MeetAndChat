@@ -16,7 +16,7 @@ HANDLE newThread(SOCKET* socket, LPTHREAD_START_ROUTINE routine);
 
 DWORD WINAPI recvThread(LPVOID lpParam);
 
-DWORD WINAPI sendThread(LPVOID lpParam);
+DWORD WINAPI sendThread(LPVOID lpParam); //TODO implement for notifications and other non client requests
 
 #endif
 //ea
