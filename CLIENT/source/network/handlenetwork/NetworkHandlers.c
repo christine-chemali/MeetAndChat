@@ -1,3 +1,5 @@
+/* 
+
 #include "network/handlenetwork/NetworkHandlers.h"
 #include "network/log/ClientLogging.h"
 #include "security/NetworkSecurity.h"
@@ -789,3 +791,4 @@ void set_current_user(const char* username) {
         memset(current_user, 0, sizeof(current_user));
     }
 }
+    */

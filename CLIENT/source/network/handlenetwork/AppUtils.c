@@ -1,6 +1,9 @@
 #include "network/handlenetwork/AppUtils.h"
 #include "network/log/ClientLogging.h"
-#include "network/handlenetwork/NetworkHandlers.h"
+#include "network/core/MessageSender.h"
+#include "network/core/NetworkCore.h"
+#include "network/core/NetworkThread.h"
+#include "network/core/SessionManager.h"
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>

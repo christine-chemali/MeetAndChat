@@ -3,7 +3,10 @@
 #include "graphics/utils/CssLoading.h"
 #include "graphics/login/UiLogin.h"
 #include "network/log/ClientLogging.h"
-#include "network/handlenetwork/NetworkHandlers.h"
+#include "network/core/MessageSender.h"
+#include "network/core/NetworkCore.h"
+#include "network/core/NetworkThread.h"
+#include "network/core/SessionManager.h"
 #include "network/handlenetwork/AppUtils.h"
 #include <stdio.h>
 

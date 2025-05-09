@@ -4,6 +4,7 @@
         "appdata.h": "c",
         "cssloading.h": "c",
         "uiforgotpassword.h": "c",
-        "uimaincontent.h": "c"
+        "uimaincontent.h": "c",
+        "clientlogging.h": "c"
     }
 }

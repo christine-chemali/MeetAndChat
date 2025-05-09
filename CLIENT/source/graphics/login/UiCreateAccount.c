@@ -3,6 +3,7 @@
 #include "callbacks/CreateAccountCallbacks.h"
 #include "network/log/ClientLogging.h"
 
+//To display the create account page
 void show_create_account_content(GtkWidget *stack, GCallback return_to_login_callback) {
     GtkWidget *account_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_set_margin_top(account_box, 20);

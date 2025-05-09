@@ -9,7 +9,11 @@
 #include "graphics/utils/DisplayPage.h"
 #include "graphics/mainapp/UiNetwork.h"
 #include "graphics/mainapp/UiNotification.h"
-#include "network/handlenetwork/NetworkHandlers.h"
+#include "network/core/MessageSender.h"
+#include "network/core/NetworkCore.h"
+#include "network/core/NetworkThread.h"
+#include "network/core/SessionManager.h"
+#include "network/handlers/MainAppHandler.h"
 
 
 // Display channels and messages

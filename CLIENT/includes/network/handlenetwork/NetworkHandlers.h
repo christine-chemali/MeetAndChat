@@ -1,3 +1,4 @@
+/* 
 #ifndef NETWORKHANDLERS_H
 #define NETWORKHANDLERS_H
 
@@ -87,3 +88,4 @@ const char* get_current_user(void);
 void set_current_user(const char* username);
 
 #endif
+*/

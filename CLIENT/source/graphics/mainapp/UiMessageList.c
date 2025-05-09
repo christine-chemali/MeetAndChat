@@ -1,8 +1,12 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
 #include "graphics/mainapp/UiMessageList.h"
-#include "network/handlenetwork/NetworkHandlers.h"
 #include "network/log/ClientLogging.h"
+#include "network/core/MessageSender.h"
+#include "network/core/NetworkCore.h"
+#include "network/core/NetworkThread.h"
+#include "network/core/SessionManager.h"
+#include "network/handlers/MainAppHandler.h"
 
 //when user name is clicked
 static void on_user_button_clicked(GtkButton *button, const char *username) {

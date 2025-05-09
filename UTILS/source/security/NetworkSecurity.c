@@ -8,7 +8,7 @@
 
 // to compile including the right header depending on client or server side 
 #ifdef IS_CLIENT
-    #include "network/handlenetwork/NetworkHandlers.h"
+    #include "network/core/MessageSender.h"
     #include "network/log/ClientLogging.h"
     #define LOG_MESSAGE log_client_message
 #else
