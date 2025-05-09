@@ -5,6 +5,8 @@
 #include "utilsnetwork/Message.h"
 #include <stdio.h>
 #include <string.h>
+#include "servernetwork/ServerSession.h"
+#include "serverlogging/ServerLogging.h" 
 
 //bind server
 int bindServer(SOCKET serverSocket, struct sockaddr_in* address) {
@@ -35,27 +37,29 @@ DWORD WINAPI clientThread(LPVOID lpParam) {
     SOCKET clientSocket = *(SOCKET*)lpParam;
     free(lpParam);
 
-    // Créer une session client
-    ClientSession* session = malloc(sizeof(ClientSession));
+    ClientSession* session = create_client_session(clientSocket);
     if (!session) {
         closesocket(clientSocket);
         return 1;
     }
 
-    // Initialiser la session
-    session->clientSocket = clientSocket;
-    session->isAuthenticated = false;
-    session->userId = 0;
-    memset(session->email, 0, sizeof(session->email));
+    if (!initialize_security()) {
+        log_server_message(ERROR, "Security init failed for session");
+        destroy_client_session(session);
+        closesocket(clientSocket);
+        return 1;
+    }
 
     HANDLE recvHandle = CreateThread(NULL, 0, recvThread, session, 0, NULL);
-    if(recvHandle != NULL) {
+    if (recvHandle) {
         CloseHandle(recvHandle);
+    } else {
+        log_server_message(ERROR, "Failed to create recv thread");
     }
 
     return 0;
 }
-  
+
 // Handle receiving client requests
 DWORD WINAPI recvThread(LPVOID lpParam) {
     ClientSession* session = (ClientSession*)lpParam;
@@ -80,7 +84,6 @@ DWORD WINAPI recvThread(LPVOID lpParam) {
         free_message(msg);
     }
     
-    // Nettoyage
     if (session->isAuthenticated) {
         handle_logout_request(session);
     }
@@ -89,5 +92,38 @@ DWORD WINAPI recvThread(LPVOID lpParam) {
     return 0;
 }
 
+// Handle new connection
+bool handle_new_connection(SOCKET clientSocket) {
+    ClientSession* session = create_client_session(clientSocket);
+    
+    // Generate a new key of each session 
+    if (!initialize_security()) {
+        log_server_message(ERROR, "Session security init failed");
+        closesocket(clientSocket);
+        destroy_client_session(session);
+        return false;
+    }
+    
+    // Configurate client thread
+    DWORD threadId;
+    HANDLE hThread = CreateThread(
+        NULL, 
+        0, 
+        clientThread, 
+        session, 
+        0, 
+        &threadId
+    );
+    
+    if (!hThread) {
+        log_server_message(ERROR, "Thread creation failed");
+        closesocket(clientSocket);
+        destroy_client_session(session);
+        return false;
+    }
+    
+    CloseHandle(hThread);
+    return true;
+}
 
-//ea
+

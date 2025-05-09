@@ -8,6 +8,7 @@ int bindServer(SOCKET serverSocket, struct sockaddr_in* address);
 int listenConnection(SOCKET serverSocket);
 DWORD WINAPI clientThread(LPVOID lpParam);
 DWORD WINAPI recvThread(LPVOID lpParam);
+bool handle_new_connection(SOCKET clientSocket);
 
 #endif
 //ea

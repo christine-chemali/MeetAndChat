@@ -27,8 +27,6 @@ void on_login_response(bool success, const char* message) {
         g_idle_add(show_main_content, g_stack);
     } else {
         log_client_message(LOG_ERROR, "Login failed");
-        
-        // Message d'erreur plus détaillé
         const char* error_msg = message ? message : "Unknown error occurred";
         g_idle_add((GSourceFunc)show_custom_dialog, g_strdup_printf("Login Error: %s", error_msg));
     }
@@ -37,7 +35,7 @@ void on_login_response(bool success, const char* message) {
 // Callback for received messages
 void on_message_received(const char* username, const char* message) {
     log_client_message(LOG_INFO, "Message received");
-    // Implémentation à venir pour l'interface de chat
+    // TODO implementation
     g_idle_add((GSourceFunc)show_custom_dialog, 
                g_strdup_printf("New message from %s", username));
 }
@@ -73,5 +71,26 @@ void on_register_response(bool success, const char* message) {
     } else {
         g_idle_add((GSourceFunc)show_custom_dialog, 
                    g_strdup_printf("Registration failed: %s", message));
+    }
+}
+
+//Disconnect button
+void on_disconnect_response(bool success, const char* message) {
+    if (success) {
+        log_client_message(LOG_INFO, "Disconnected successfully");
+        if (g_stack) {
+            g_idle_add((GSourceFunc)gtk_stack_set_visible_child_name, 
+                      GINT_TO_POINTER("login"));
+        }
+    } else {
+        log_client_message(LOG_ERROR, "Disconnect failed");
+        const char* error_msg = message ? message : "Unknown error occurred";
+        g_idle_add((GSourceFunc)show_custom_dialog, 
+                   g_strdup_printf("Disconnect Error: %s", error_msg));
+
+        if (g_stack) {
+            g_idle_add((GSourceFunc)gtk_stack_set_visible_child_name, 
+                      GINT_TO_POINTER("login"));
+        }
     }
 }

@@ -1049,3 +1049,5 @@ dkms.conf
 config.ini
 *.ini
 !config.example.ini
+
+!log/

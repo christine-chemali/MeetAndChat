@@ -1,14 +1,14 @@
-#ifndef MESSAGEHANDLER_H
-#define MESSAGEHANDLER_H
+#ifndef MESSAGE_HANDLER_H
+#define MESSAGE_HANDLER_H
 
 #include <winsock2.h>
-#include "utilsnetwork/Message.h"
-#include "servernetwork/login/LoginHandler.h"
-#include "security/NetworkSecurity.h"
+#include "servernetwork/ServerSession.h"
+#include <stdbool.h>
 
 Message* receive_message(SOCKET socket);
 void free_message(Message* msg);
-void handle_client_message(ClientSession* session, Message* msg);
 bool send_message_to_client(ClientSession* session, Message* msg);
+Message* create_heartbeat_message(void);
+void handle_client_message(ClientSession* session, Message* msg);
 
-#endif
+#endif 

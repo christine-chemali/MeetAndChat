@@ -70,6 +70,7 @@ bool load_server_config(const char *filename, ServerConfig *config) {
     return validate_config(config);
 }
 
+//Return connection string
 char* get_db_connection_string(const ServerConfig *config) {
     snprintf(connection_string, sizeof(connection_string),
              "host=%s port=%s dbname=%s user=%s password=%s",

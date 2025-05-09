@@ -7,30 +7,42 @@
 #include <gtk/gtk.h>
 #include "utilsnetwork/Message.h"
 #include <winsock2.h>
+#include <ws2tcpip.h>  // for inet_pton
+
+#define INVALID_PORT(p) ((p) <= 0 || (p) > 65535)
+#define INVALID_ADDRESS(a) (!(a) || !*(a))
+#define SOCKET_TIMEOUT 5000
+#define DEFAULT_PROTOCOL IPPROTO_TCP
 
 //Network config constants 
-#define CONNECTION_TIMEOUT 30        // Connection timeout in seconds
-#define MAX_RECONNECT_ATTEMPTS 3     // Maximum number of reconnection attempts
-#define HEARTBEAT_INTERVAL 30        // Heartbeat interval in seconds
-#define MAX_ADDRESS_LENGTH 128       // Maximum length for server address
-#define USER_LIST_REQUEST 10
-#define USER_LIST_RESPONSE 11
-#define LOGOUT_REQUEST 13
+#define CONNECTION_TIMEOUT 5       
+#define MAX_RECONNECT_ATTEMPTS 3    
+#define HEARTBEAT_INTERVAL 30        
+#define MAX_ADDRESS_LENGTH 128      
+
+typedef enum {
+    NETWORK_STATE_DISCONNECTED,
+    NETWORK_STATE_CONNECTING,
+    NETWORK_STATE_CONNECTED,
+    NETWORK_STATE_AUTHENTICATING,
+    NETWORK_STATE_AUTHENTICATED
+} NetworkState;
 
 //External variables for network management 
-extern SOCKET clientSocket;          // Main client socket
-extern bool isConnected;             // Connection status flag
-extern HANDLE networkThread;         // Network receiving thread handle
-extern HANDLE heartbeatThread;       // Heartbeat thread handle
-extern char last_known_address[MAX_ADDRESS_LENGTH];  // Last server address
-extern int last_known_port;          // Last server port
+extern SOCKET clientSocket;         
+extern bool isConnected;             
+extern HANDLE networkThread;        
+extern HANDLE heartbeatThread;      
+extern char last_known_address[MAX_ADDRESS_LENGTH];  
+extern int last_known_port;         
 
-// callbacks
+// Network callbacks
 extern void on_message_received(const char* username, const char* message);
 extern void on_history_received(const char* username, const char** messages, int count);
 extern void on_user_status_changed(const char* username, bool is_online);
 extern void on_login_response(bool success, const char* message);
 extern void on_register_response(bool success, const char* message);
+extern void on_disconnect_response(bool success, const char* message);
 
 //Network init and cleanup 
 bool initialize_network(const char* address, int port);
@@ -47,6 +59,7 @@ bool send_message_to_server(Message* msg);
 bool send_login_request(const char* username, const char* password);
 bool send_register_request(const char* username, const char* password);
 bool send_logout_request(void);
+bool send_disconnect_request(const char* username);
 
 //Message and chat
 bool send_chat_message(const char* username, const char* message);
@@ -59,21 +72,18 @@ void subscribe_to_messages(const char* username);
 void request_user_list(void);
 void update_user_status(const char* username, bool is_online);
 
-//Callback function
-void on_message_received(const char* username, const char* message);
-void on_history_received(const char* username, const char** messages, int count);
-void on_user_status_changed(const char* username, bool is_online);
-void on_login_response(bool success, const char* message);
-void on_register_response(bool success, const char* message);
-
 //Thread function prototypes 
 static DWORD WINAPI network_receive_thread(LPVOID lpParam);
 static DWORD WINAPI heartbeat_thread(LPVOID lpParam);
 
-//Registration request (uicreateaccount)
+//Registration request
 bool send_registration_request(const char *first_name, const char *last_name, 
     const char *username, const char *email, 
     const char *password, const char *first_question, 
     const char *second_question);
 
-#endif 
+    // User management
+const char* get_current_user(void);
+void set_current_user(const char* username);
+
+#endif

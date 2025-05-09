@@ -94,6 +94,11 @@ int main() {
             continue;
         }
 
+        if (!handle_new_connection(clientSocket)) {
+            log_server_message(LOG_WARNING, "Failed to handle new connection");
+            closesocket(clientSocket);
+        }
+
         log_server_message(LOG_INFO, "New client connected");
 
         SOCKET* clientPtr = malloc(sizeof(SOCKET));

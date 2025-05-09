@@ -6,7 +6,8 @@
 #include "utilsnetwork/Message.h"
 #include <stdbool.h>
 
-#define SECURITY_KEY_LENGTH 16
+#define SECURITY_KEY_LENGTH 32
+#define MAX_MESSAGE_LENGTH 1024
 
 // Secure message structure
 typedef struct {

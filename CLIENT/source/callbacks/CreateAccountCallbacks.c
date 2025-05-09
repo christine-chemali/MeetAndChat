@@ -5,6 +5,7 @@
 #include "logic/login/ValidationProcess.h"
 #include "callbacks/GuiCallbacks.h"
 
+//Create account on button click
 void on_create_account_button_clicked(GtkButton *button, CreateAccountData *data) {
     const char *first_name = gtk_editable_get_text(GTK_EDITABLE(data->first_name_entry));
     const char *last_name = gtk_editable_get_text(GTK_EDITABLE(data->last_name_entry));

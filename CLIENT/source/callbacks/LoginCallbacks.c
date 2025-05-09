@@ -62,8 +62,18 @@ void show_login(GtkWidget *widget, gpointer stack) {
 // Handle disconnect button click event to logout and show login interface
 void on_disconnect_button_clicked(GtkWidget *widget, gpointer stack) {
     log_client_message(LOG_INFO, "Disconnecting from server");
-    send_logout_request(); 
-    show_login(widget, stack);
+    
+    const char* current_user = get_current_user(); // Vous devrez implémenter cette fonction
+    if (send_disconnect_request(current_user)) {
+        log_client_message(LOG_INFO, "Disconnect request sent successfully");
+        cleanup_network();
+        show_login(widget, stack);
+    } else {
+        log_client_message(LOG_ERROR, "Failed to send disconnect request");
+        show_custom_dialog("Error", "Failed to disconnect properly. Returning to login.");
+        cleanup_network();
+        show_login(widget, stack);
+    }
 }
 
 // Clean up resources related to the login interface

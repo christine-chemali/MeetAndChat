@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
         return 1;
     }
     
-    init_client_logging(connection_info); // ??? accurate ?
+    init_client_logging(connection_info); 
     log_client_message(LOG_INFO, "Application is starting...");
 
     // Parse network configuration
