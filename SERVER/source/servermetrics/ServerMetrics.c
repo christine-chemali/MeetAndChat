@@ -6,8 +6,9 @@
 static volatile int g_active_connections = 0;
 static volatile int g_queries_count = 0;
 static ULONGLONG g_last_query_time = 0;
+static PROCESS_MEMORY_COUNTERS pmc;
 
-//Cpu usage
+// CPU usage
 double get_cpu_usage(void) {
     char log_buffer[256];
     FILETIME idleTime, kernelTime, userTime;
@@ -50,7 +51,7 @@ double get_cpu_usage(void) {
     return (double)(totalTime - idleDiff.QuadPart) * 100.0 / totalTime;
 }
 
-//memory usage
+// Memory usage 
 double get_memory_usage(void) {
     char log_buffer[256];
     MEMORYSTATUSEX memInfo;
@@ -62,11 +63,30 @@ double get_memory_usage(void) {
         log_server_message(LOG_ERROR, log_buffer);
         return 0.0;
     }
+
+    // info about process memory
+    HANDLE process = GetCurrentProcess();
+    if (GetProcessMemoryInfo(process, &pmc, sizeof(pmc))) {
+        snprintf(log_buffer, sizeof(log_buffer),
+            "METRICS_DETAIL: Process Memory - Working Set: %llu KB, Peak Working Set: %llu KB, Page File: %llu KB",
+            pmc.WorkingSetSize / 1024,
+            pmc.PeakWorkingSetSize / 1024,
+            pmc.PagefileUsage / 1024);
+        log_server_message(LOG_DEBUG, log_buffer);
+    }
+
+    // Info about system memory 
+    snprintf(log_buffer, sizeof(log_buffer),
+        "METRICS_DETAIL: System Memory - Total: %llu MB, Available: %llu MB, Used: %llu MB",
+        memInfo.ullTotalPhys / (1024 * 1024),
+        memInfo.ullAvailPhys / (1024 * 1024),
+        (memInfo.ullTotalPhys - memInfo.ullAvailPhys) / (1024 * 1024));
+    log_server_message(LOG_DEBUG, log_buffer);
     
     return (double)memInfo.dwMemoryLoad;
 }
 
-//active connections
+// Active connections
 int get_active_connections(void) {
     char log_buffer[256];
     snprintf(log_buffer, sizeof(log_buffer),
@@ -76,7 +96,7 @@ int get_active_connections(void) {
     return g_active_connections;
 }
 
-//Queries per sec
+// Queries per second
 int get_queries_per_second(void) {
     char log_buffer[256];
     ULONGLONG currentTime = GetTickCount64();
@@ -100,7 +120,7 @@ int get_queries_per_second(void) {
     return qps;
 }
 
-//Performance Monitor thread
+// Performance Monitor thread - modifié avec intervalle plus court
 DWORD WINAPI performanceMonitorThread(LPVOID lpParam) {
     char log_buffer[256];
     snprintf(log_buffer, sizeof(log_buffer),
@@ -122,7 +142,7 @@ DWORD WINAPI performanceMonitorThread(LPVOID lpParam) {
         log_server_message(LOG_PERFORMANCE, log_buffer);
 
         log_performance_metrics(&metrics);
-        Sleep(60000); // Wait 1 minute before next check
+        Sleep(30000); 
     }
     return 0;
 }
