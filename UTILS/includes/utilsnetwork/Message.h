@@ -25,15 +25,14 @@
 #define LOGOUT_REQUEST 21
 
 #define MAX_MESSAGE_LENGTH 1024
-#define MESSAGE_HEADER_SIZE (sizeof(int) * 2)  // type + length
+#define MESSAGE_HEADER_SIZE (sizeof(int) * 3) // type + length + checksum
 
 // Data structure
-typedef struct {
+typedef struct __attribute__((packed)) {  
     int type;
     int length;
     unsigned int checksum;
     char data[MAX_MESSAGE_LENGTH];
-    char padding[4];
 } Message;
 
 #endif 

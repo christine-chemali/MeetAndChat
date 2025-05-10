@@ -119,15 +119,17 @@ DWORD WINAPI heartbeat_thread(LPVOID lpParam) {
 
     while (isConnected) {
 
-        Sleep(15000);  // 15 sec for test instead of 30 sec TODO: change when test phase are over
+        Sleep(15000);  // 15 sec 
 
         if (!isConnected) {
             log_client_message(LOG_INFO, "HB: Connection closed, stopping heartbeat");
             break;
         }
 
+        time_t t = time(NULL);
+        struct tm* tm_info = localtime(&t);
         snprintf(log_buffer, sizeof(log_buffer), 
-            "HB: Preparing heartbeat at %ld", (long)time(NULL));
+            "HB: Preparing heartbeat at %02d:%02d:%02d", tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec);
         log_client_message(LOG_DEBUG, log_buffer);
 
         memset(&heartbeat, 0, sizeof(Message));

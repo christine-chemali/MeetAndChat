@@ -104,6 +104,7 @@ Message* receive_message(SOCKET socket) {
     return msg;
 }
 
+//Create heartbeat message
 Message* create_heartbeat_message() {
     char log_buffer[256];
     
@@ -186,16 +187,22 @@ void handle_client_message(ClientSession* session, Message* msg) {
         return;
     }
 
+    // Calculate idle before update 
+    time_t current_time = time(NULL);
+    time_t idle_time = current_time - session->lastActivity;
+    
     snprintf(log_buffer, sizeof(log_buffer), 
-        "MSG: Processing message type %d from %s", 
+        "MSG: Processing message type %d from socket %d (idle: %02d:%02d:%02d)", 
         msg->type,
-        session->username ? session->username : "unknown");
+        (int)session->clientSocket,
+        (int)(idle_time/3600), (int)((idle_time%3600)/60), (int)(idle_time%60));
     log_server_message(LOG_DEBUG, log_buffer);
 
-    // Switch
+    //switch
     switch(msg->type) {
         case LOGIN_REQUEST: {
-            snprintf(log_buffer, sizeof(log_buffer), "MSG: Processing login request from socket %d", 
+            snprintf(log_buffer, sizeof(log_buffer), 
+                "MSG: Processing login request from socket %d", 
                 (int)session->clientSocket);
             log_server_message(LOG_INFO, log_buffer);
             handle_login_request(session, msg);
@@ -203,16 +210,19 @@ void handle_client_message(ClientSession* session, Message* msg) {
         }
            
         case LOGOUT: {
-            snprintf(log_buffer, sizeof(log_buffer), "MSG: Processing logout request from %s", 
-                session->username ? session->username : "unknown");
+            snprintf(log_buffer, sizeof(log_buffer), 
+                "MSG: Processing logout request from socket %d", 
+                (int)session->clientSocket);
             log_server_message(LOG_INFO, log_buffer);
             handle_logout_request(session);
             break;
         }
     
         case HEARTBEAT: {
-            snprintf(log_buffer, sizeof(log_buffer), "MSG: Processing heartbeat from %s", 
-                session->username ? session->username : "unknown");
+            snprintf(log_buffer, sizeof(log_buffer), 
+                "MSG: Processing heartbeat from socket %d (idle: %02d:%02d:%02d)", 
+                (int)session->clientSocket,
+                (int)(idle_time/3600), (int)((idle_time%3600)/60), (int)(idle_time%60));
             log_server_message(LOG_DEBUG, log_buffer);
             
             Message* response = create_heartbeat_message();
@@ -231,22 +241,18 @@ void handle_client_message(ClientSession* session, Message* msg) {
     
         default: {
             snprintf(log_buffer, sizeof(log_buffer), 
-                "MSG: Unknown message type %d from %s", 
+                "MSG: Unknown message type %d from socket %d", 
                 msg->type,
-                session->username ? session->username : "unknown");
+                (int)session->clientSocket);
             log_server_message(LOG_WARNING, log_buffer);
         }
     }
 
     // Update activity timestamp
-    time_t current_time = time(NULL);
-    time_t idle_time = current_time - session->lastActivity;
+    session->lastActivity = current_time;
     
     snprintf(log_buffer, sizeof(log_buffer), 
-        "MSG: Updated activity timestamp for %s (idle for %ld seconds)", 
-        session->username ? session->username : "unknown",
-        (long)idle_time);
+        "MSG: Updated activity timestamp for socket %d", 
+        (int)session->clientSocket);
     log_server_message(LOG_DEBUG, log_buffer);
-    
-    session->lastActivity = current_time;
 }

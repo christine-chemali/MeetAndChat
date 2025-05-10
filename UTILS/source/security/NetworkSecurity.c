@@ -23,6 +23,15 @@ static bool is_security_initialized = false;
 
 // Init security generating session key
 bool initialize_security(void) {
+    char log_buffer[256];
+    static const size_t expected_size = sizeof(int) * 3 + MAX_MESSAGE_LENGTH;
+    
+    if (sizeof(Message) != expected_size) {
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "SEC: WARNING - Message structure size mismatch (actual: %zu, expected: %zu)", 
+            sizeof(Message), expected_size);
+        LOG_MESSAGE(LOG_WARNING, log_buffer);
+    }
     if (is_security_initialized) {
         return true;  
     }

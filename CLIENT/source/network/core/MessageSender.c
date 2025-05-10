@@ -10,6 +10,14 @@
 // Send a message to the server
 bool send_message_to_server(Message* msg) {
     char log_buffer[256];
+    static const size_t expected_size = sizeof(int) * 3 + MAX_MESSAGE_LENGTH;
+    
+    if (sizeof(Message) != expected_size) {
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "SND: WARNING - Message structure size mismatch (actual: %zu, expected: %zu)", 
+            sizeof(Message), expected_size);
+        log_client_message(LOG_WARNING, log_buffer);
+    }
     
     if (!check_connection_status()) {
         log_client_message(LOG_ERROR, "SND: Connection check failed");
@@ -36,8 +44,7 @@ bool send_message_to_server(Message* msg) {
         send_msg.type = HEARTBEAT;
         send_msg.length = 0;
         send_msg.checksum = 0;
-        memset(send_msg.data, 0, sizeof(send_msg.data));
-        memset(send_msg.padding, 0, sizeof(send_msg.padding));
+        memset(send_msg.data, 0, MAX_MESSAGE_LENGTH);
         
         snprintf(log_buffer, sizeof(log_buffer), 
             "SND: Sending heartbeat (message size: %zu)", sizeof(Message));
