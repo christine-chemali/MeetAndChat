@@ -16,15 +16,20 @@ static PGconn *server_db_conn = NULL;
 
 //Init server logging
 bool init_server_logging(const char *db_conninfo) {
+    char log_buffer[256];
+    
     if (!db_conninfo) {
-        fprintf(stderr, "Invalid database connection info\n");
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "DB: Invalid connection info");
+        log_server_message(LOG_ERROR, log_buffer);
         return false;
     }
 
     server_db_conn = PQconnectdb(db_conninfo);
     if (PQstatus(server_db_conn) != CONNECTION_OK) {
-        fprintf(stderr, "Database connection failed: %s\n", 
-                PQerrorMessage(server_db_conn));
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "DB: Connection failed");
+        log_server_message(LOG_ERROR, log_buffer);
         return false;
     }
 
@@ -70,8 +75,9 @@ bool init_server_logging(const char *db_conninfo) {
 
     PGresult *res = PQexec(server_db_conn, create_tables);
     if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-        fprintf(stderr, "Failed to create tables: %s\n", 
-                PQerrorMessage(server_db_conn));
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "DB: Failed to create tables");
+        log_server_message(LOG_ERROR, log_buffer);
         PQclear(res);
         return false;
     }
@@ -128,12 +134,15 @@ void log_server_message(LogLevel level, const char *message) {
         "INSERT INTO server_logs (level, message) VALUES ($1, $2)";
     const char *params[2] = {level_str, message};
     
+    char log_buffer[256];
     PGresult *res = PQexecParams(server_db_conn, query, 2, 
                                 NULL, params, NULL, NULL, 0);
     
     if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-        fprintf(stderr, "Failed to log message: %s\n", 
-                PQerrorMessage(server_db_conn));
+        snprintf(log_buffer, sizeof(log_buffer),
+            "LOG: Failed to write to database");
+        fprintf(stderr, "%s[%s][ERROR] %s%s\n", 
+            ANSI_COLOR_RED, date, log_buffer, ANSI_COLOR_RESET);
     }
     PQclear(res);
 }
@@ -144,6 +153,8 @@ void log_security_event(const char *username, const char *event_type,
                        const char *details) {
     if (!server_db_conn) return;
 
+    char log_buffer[1024];
+
     const char *query = 
         "INSERT INTO security_logs (username, event_type, details) "
         "VALUES ($1, $2, $3)";
@@ -153,22 +164,29 @@ void log_security_event(const char *username, const char *event_type,
                                 NULL, params, NULL, NULL, 0);
     
     if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-        fprintf(stderr, "Failed to log security event: %s\n", 
-                PQerrorMessage(server_db_conn));
+        snprintf(log_buffer, sizeof(log_buffer),
+            "SEC: Failed to log security event for socket %s",
+            username);
+        log_server_message(LOG_ERROR, log_buffer);
     }
     PQclear(res);
 
-    // Also log to server_logs for general tracking
-    char combined_message[1024];
-    snprintf(combined_message, sizeof(combined_message), 
-             "Security Event - User: %s, Type: %s, Details: %s",
-             username, event_type, details);
-    log_server_message(LOG_SECURITY, combined_message);
+    snprintf(log_buffer, sizeof(log_buffer),
+        "SEC: Event type %s for socket %s",
+        event_type, username);
+    log_server_message(LOG_SECURITY, log_buffer);
 }
 
 //log performance metrics
 void log_performance_metrics(const ServerMetrics *metrics) {
-    if (!server_db_conn || !metrics) return;
+    char log_buffer[256];
+    
+    if (!server_db_conn || !metrics) {
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "PERF: Invalid metrics data");
+        log_server_message(LOG_ERROR, log_buffer);
+        return;
+    }
 
     const char *query = 
         "INSERT INTO performance_logs "
@@ -187,15 +205,23 @@ void log_performance_metrics(const ServerMetrics *metrics) {
                                 NULL, params, NULL, NULL, 0);
     
     if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-        fprintf(stderr, "Failed to log performance metrics: %s\n", 
-                PQerrorMessage(server_db_conn));
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "PERF: Failed to log metrics");
+        log_server_message(LOG_ERROR, log_buffer);
     }
     PQclear(res);
 }
 
 //Clean old logs
 bool cleanup_old_logs(int days_to_retain) {
-    if (!server_db_conn) return false;
+    char log_buffer[256];
+    
+    if (!server_db_conn) {
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "CLEAN: No database connection");
+        log_server_message(LOG_ERROR, log_buffer);
+        return false;
+    }
 
     const char *queries[] = {
         "DELETE FROM server_logs WHERE timestamp < NOW() - INTERVAL '%d days'",
@@ -211,8 +237,9 @@ bool cleanup_old_logs(int days_to_retain) {
         PGresult *res = PQexec(server_db_conn, query);
         
         if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-            fprintf(stderr, "Failed to cleanup logs: %s\n", 
-                    PQerrorMessage(server_db_conn));
+            snprintf(log_buffer, sizeof(log_buffer), 
+                "CLEAN: Failed to cleanup table %d", i);
+            log_server_message(LOG_ERROR, log_buffer);
             success = false;
         }
         PQclear(res);
@@ -224,7 +251,14 @@ bool cleanup_old_logs(int days_to_retain) {
 //analyse log
 bool analyze_logs(const char *start_date, const char *end_date, 
                  LogAnalytics *analytics) {
-    if (!server_db_conn || !analytics) return false;
+    char log_buffer[256];
+    
+    if (!server_db_conn || !analytics) {
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "ANALYZE: Invalid parameters");
+        log_server_message(LOG_ERROR, log_buffer);
+        return false;
+    }
 
     const char *query = 
         "SELECT "
@@ -241,8 +275,9 @@ bool analyze_logs(const char *start_date, const char *end_date,
                                 NULL, params, NULL, NULL, 0);
     
     if (PQresultStatus(res) != PGRES_TUPLES_OK) {
-        fprintf(stderr, "Failed to analyze logs: %s\n", 
-                PQerrorMessage(server_db_conn));
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "ANALYZE: Failed to analyze logs");
+        log_server_message(LOG_ERROR, log_buffer);
         PQclear(res);
         return false;
     }

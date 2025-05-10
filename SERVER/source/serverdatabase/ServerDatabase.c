@@ -1,4 +1,5 @@
 #include "serverdatabase/ServerDatabase.h"
+#include "serverlogging/ServerLogging.h" 
 #include <stdio.h>
 #include <string.h>
 
@@ -6,10 +7,14 @@ static DatabaseConnection db = {NULL};
 
 //init server database
 bool init_server_database(const char *connection_info) {
+    char log_buffer[256];
+    
     db.conn = PQconnectdb(connection_info);
     
     if (PQstatus(db.conn) != CONNECTION_OK) {
-        fprintf(stderr, "Database connection failed: %s\n", PQerrorMessage(db.conn));
+        snprintf(log_buffer, sizeof(log_buffer),
+            "DB: Connection failed");
+        log_server_message(LOG_ERROR, log_buffer);
         return false;
     }
 
@@ -120,25 +125,67 @@ bool init_server_database(const char *connection_info) {
         "CREATE INDEX IF NOT EXISTS idx_server_members_server ON server_members(server_id);"
         "CREATE INDEX IF NOT EXISTS idx_server_members_user ON server_members(user_id);";
 
+    snprintf(log_buffer, sizeof(log_buffer),
+        "DB: Initializing database schema");
+    log_server_message(LOG_INFO, log_buffer);
+
     PGresult *res = PQexec(db.conn, create_tables);
     if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-        fprintf(stderr, "Failed to create tables: %s\n", PQerrorMessage(db.conn));
+        snprintf(log_buffer, sizeof(log_buffer),
+            "DB: Schema initialization failed");
+        log_server_message(LOG_ERROR, log_buffer);
         PQclear(res);
         return false;
     }
+    
     PQclear(res);
+    
+    // Log successful table creation without exposing schema details
+    const char* tables[] = {
+        "users", "servers", "categories", "channels",
+        "channel_permissions", "category_permissions",
+        "server_members", "password_recovery_tokens"
+    };
+    
+    for(int i = 0; i < sizeof(tables)/sizeof(tables[0]); i++) {
+        snprintf(log_buffer, sizeof(log_buffer),
+            "DB: Verified table: %s", tables[i]);
+        log_server_message(LOG_DEBUG, log_buffer);
+    }
+
+    snprintf(log_buffer, sizeof(log_buffer),
+        "DB: Schema initialization completed successfully");
+    log_server_message(LOG_INFO, log_buffer);
+    
     return true;
 }
 
 //close server database
 void close_server_database(void) {
+    char log_buffer[256];
+    
     if (db.conn) {
+        snprintf(log_buffer, sizeof(log_buffer),
+            "DB: Closing database connection");
+        log_server_message(LOG_INFO, log_buffer);
+        
         PQfinish(db.conn);
         db.conn = NULL;
+        
+        snprintf(log_buffer, sizeof(log_buffer),
+            "DB: Database connection closed");
+        log_server_message(LOG_DEBUG, log_buffer);
     }
 }
 
 //get database connection
 PGconn *get_database_connection(void) {
+    char log_buffer[256];
+    
+    if (!db.conn) {
+        snprintf(log_buffer, sizeof(log_buffer),
+            "DB: Attempted to access null database connection");
+        log_server_message(LOG_ERROR, log_buffer);
+    }
     return db.conn;
 }

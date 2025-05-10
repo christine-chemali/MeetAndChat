@@ -106,8 +106,8 @@ DWORD WINAPI recvThread(LPVOID lpParam) {
     
     if (session->isAuthenticated) {
         snprintf(log_buffer, sizeof(log_buffer), 
-            "RECV: Handling logout for authenticated user %s", 
-            session->username ? session->username : "unknown");
+            "RECV: Handling logout for socket %d",
+            (int)session->clientSocket);
         log_server_message(LOG_INFO, log_buffer);
         handle_logout_request(session);
     }

@@ -28,10 +28,10 @@ bool initialize_security(void) {
     
     if (sizeof(Message) != expected_size) {
         snprintf(log_buffer, sizeof(log_buffer), 
-            "SEC: WARNING - Message structure size mismatch (actual: %zu, expected: %zu)", 
-            sizeof(Message), expected_size);
+            "SEC: Structure size validation failed");
         LOG_MESSAGE(LOG_WARNING, log_buffer);
     }
+    
     if (is_security_initialized) {
         return true;  
     }
@@ -41,196 +41,168 @@ bool initialize_security(void) {
     session_key[SECURITY_KEY_LENGTH] = '\0';
     
     if (strlen(session_key) != SECURITY_KEY_LENGTH) {
-        LOG_MESSAGE(LOG_ERROR, "Failed to generate valid session key");
+        LOG_MESSAGE(LOG_ERROR, "SEC: Initialization failed");
         return false;
     }
 
     is_security_initialized = true;
-    LOG_MESSAGE(LOG_INFO, "Security initialized successfully");
+    LOG_MESSAGE(LOG_INFO, "SEC: Initialization complete");
     return true;
 }
 
 // Encrypts the message using the provided key
 void encrypt_message(Message* msg, const char* key) {
-    if (!msg || !key) {
-        LOG_MESSAGE(LOG_ERROR, "Invalid parameters for message encryption");
+    if (!msg || !key || !is_security_initialized) {
+        LOG_MESSAGE(LOG_ERROR, "SEC: Encryption failed - invalid state");
         return;
     }
     
-    if (!is_security_initialized) {
-        LOG_MESSAGE(LOG_ERROR, "Security not initialized");
-        return;
-    }
-
     xor_cipher(msg->data, key);
+    LOG_MESSAGE(LOG_DEBUG, "SEC: Message encrypted");
 }
 
 // Decrypts the message using the provided key
 void decrypt_message(Message* msg, const char* key) {
-    if (!msg || !key) {
-        LOG_MESSAGE(LOG_ERROR, "Invalid parameters for message decryption");
-        return;
-    }
-    
-    if (!is_security_initialized) {
-        LOG_MESSAGE(LOG_ERROR, "Security not initialized");
+    if (!msg || !key || !is_security_initialized) {
+        LOG_MESSAGE(LOG_ERROR, "SEC: Decryption failed - invalid state");
         return;
     }
 
     xor_cipher(msg->data, key);
+    LOG_MESSAGE(LOG_DEBUG, "SEC: Message decrypted");
 }
 
 // Returns the current session key
 char* get_session_key(void) {
     if (!is_security_initialized) {
-        LOG_MESSAGE(LOG_ERROR, "Attempting to get session key before security initialization");
+        LOG_MESSAGE(LOG_ERROR, "SEC: Key access denied - not initialized");
         return NULL;
     }
     return session_key;
 }
 
 // Calculate a checksum for the given data
-    unsigned int calculate_checksum(const char* data, int length) {
-        if (length < 0 || length > MAX_MESSAGE_LENGTH) {
-            return 0;
-        }
-        
-        unsigned int checksum = 0;
-        if (length == 0) {
-            return checksum;  // return 0 for empty messages
-        }
-        
-        if (!data) {
-            return 0;
-        }
+unsigned int calculate_checksum(const char* data, int length) {
+    if (!data || length < 0 || length > MAX_MESSAGE_LENGTH) {
+        return 0;
+    }
+    
+    unsigned int checksum = 0;
+    for (int i = 0; i < length; i++) {
+        checksum += (unsigned char)data[i];
+    }
+    return checksum;
+}
 
-        for (int i = 0; i < length; i++) {
-            checksum += (unsigned char)data[i];
-        }
-        return checksum;
+// Verify if the message's checksum matches its data
+bool verify_message_checksum(Message* msg) {
+    char log_buffer[256];
+    
+    if (!msg) {
+        LOG_MESSAGE(LOG_ERROR, "SEC: Verification failed - null message");
+        return false;
     }
 
-    // Verify if the message's checksum matches its data
-    bool verify_message_checksum(Message* msg) {
-        char log_buffer[256];
-        
-        if (!msg) {
-            LOG_MESSAGE(LOG_ERROR, "SEC: Null message pointer in checksum verification");
-            return false;
-        }
-    
-        // for heartbeats accept 0 for lenght
-        if (msg->type == HEARTBEAT) {
-            if (msg->length != 0) {
-                snprintf(log_buffer, sizeof(log_buffer), 
-                    "SEC: Invalid heartbeat length: %d (should be 0)", msg->length);
-                LOG_MESSAGE(LOG_ERROR, log_buffer);
-                return false;
-            }
-            return true;
-        }
-    
-        // for other messages : stantard verification 
-        if (msg->length < 0 || msg->length > MAX_MESSAGE_LENGTH) {
+    // For heartbeats accept 0 for length
+    if (msg->type == HEARTBEAT) {
+        if (msg->length != 0) {
             snprintf(log_buffer, sizeof(log_buffer), 
-                "SEC: Invalid message length: %d", msg->length);
+                "SEC: Invalid heartbeat detected");
             LOG_MESSAGE(LOG_ERROR, log_buffer);
             return false;
         }
-    
-        // Verify real data lenght 
-        size_t actual_length = strnlen(msg->data, MAX_MESSAGE_LENGTH);
-        if (actual_length != msg->length) {
-            snprintf(log_buffer, sizeof(log_buffer), 
-                "SEC: Length mismatch (declared: %d, actual: %zu)", 
-                msg->length, actual_length);
-            LOG_MESSAGE(LOG_ERROR, log_buffer);
-            return false;
-        }
-    
-        // Calcul and compare checksum
-        unsigned int calculated = calculate_checksum(msg->data, msg->length);
-        if (calculated != msg->checksum) {
-            snprintf(log_buffer, sizeof(log_buffer), 
-                "SEC: Checksum mismatch (expected: %u, got: %u)",
-                msg->checksum, calculated);
-            LOG_MESSAGE(LOG_WARNING, log_buffer);
-            return false;
-        }
-    
-        LOG_MESSAGE(LOG_DEBUG, "SEC: Message checksum verification successful");
         return true;
     }
+
+    // For other messages: standard verification
+    if (msg->length < 0 || msg->length > MAX_MESSAGE_LENGTH) {
+        LOG_MESSAGE(LOG_ERROR, "SEC: Invalid message length");
+        return false;
+    }
+
+    // Verify real data length
+    size_t actual_length = strnlen(msg->data, MAX_MESSAGE_LENGTH);
+    if (actual_length != msg->length) {
+        LOG_MESSAGE(LOG_ERROR, "SEC: Message length mismatch");
+        return false;
+    }
+
+    // Calculate and compare checksum
+    unsigned int calculated = calculate_checksum(msg->data, msg->length);
+    if (calculated != msg->checksum) {
+        LOG_MESSAGE(LOG_WARNING, "SEC: Checksum verification failed");
+        return false;
+    }
+
+    LOG_MESSAGE(LOG_DEBUG, "SEC: Verification successful");
+    return true;
+}
 
 // Prepares the message by calculating its checksum
 void prepare_message(Message* msg) {
     if (!msg) {
-        LOG_MESSAGE(LOG_ERROR, "Null message in prepare_message");
+        LOG_MESSAGE(LOG_ERROR, "SEC: Message preparation failed");
         return;
     }
 
     // Secure data truncation
     size_t data_len = strnlen(msg->data, MAX_MESSAGE_LENGTH);
     if (data_len >= MAX_MESSAGE_LENGTH) {
-        LOG_MESSAGE(LOG_WARNING, "Message data truncated");
+        LOG_MESSAGE(LOG_WARNING, "SEC: Message truncated");
         msg->data[MAX_MESSAGE_LENGTH - 1] = '\0';
         data_len = MAX_MESSAGE_LENGTH - 1;
     }
     
-    // update data
     msg->length = (int)data_len;
     msg->checksum = calculate_checksum(msg->data, msg->length);
+    LOG_MESSAGE(LOG_DEBUG, "SEC: Message prepared");
 }
 
 #ifdef IS_CLIENT
-// Client specific code
+// Client specific code - Handle key rotation message
 void handle_key_rotation(Message* msg) {
-    if (!msg) {
-        LOG_MESSAGE(LOG_ERROR, "Null message in key rotation handler");
-        return;
-    }
-
-    if (msg->type != KEY_ROTATION || msg->length != SECURITY_KEY_LENGTH) {
-        LOG_MESSAGE(LOG_ERROR, "Invalid key rotation message");
+    if (!msg || msg->type != KEY_ROTATION || 
+        msg->length != SECURITY_KEY_LENGTH) {
+        LOG_MESSAGE(LOG_ERROR, "SEC: Key rotation failed");
         return;
     }
 
     strncpy(session_key, msg->data, SECURITY_KEY_LENGTH);
     session_key[SECURITY_KEY_LENGTH] = '\0';
-    LOG_MESSAGE(LOG_INFO, "Session key rotated successfully");
+    LOG_MESSAGE(LOG_INFO, "SEC: Key rotation complete");
 }
 
+// Request a new key rotation from server
 bool request_key_rotation(void) {
     if (!is_security_initialized) {
-        LOG_MESSAGE(LOG_ERROR, "Security not initialized for key rotation");
+        LOG_MESSAGE(LOG_ERROR, "SEC: Cannot request key rotation");
         return false;
     }
 
-    Message key_request;
-    memset(&key_request, 0, sizeof(Message));
+    Message key_request = {0};
     key_request.type = KEY_ROTATION_REQUEST;
     key_request.length = 0;
     prepare_message(&key_request);
     
+    LOG_MESSAGE(LOG_INFO, "SEC: Key rotation requested");
     return send_message_to_server(&key_request);
 }
 
 #else
-// Server specific code
+// Server specific code - Generate and send new session key
 Message* rotate_session_key(void) {
     if (!is_security_initialized) {
-        LOG_MESSAGE(LOG_ERROR, "Security not initialized for key rotation");
+        LOG_MESSAGE(LOG_ERROR, "SEC: Key rotation failed - not initialized");
         return NULL;
     }
 
-    char new_key[SECURITY_KEY_LENGTH + 1];
-    memset(new_key, 0, sizeof(new_key));
+    char new_key[SECURITY_KEY_LENGTH + 1] = {0};
     generate_random_key(new_key, SECURITY_KEY_LENGTH);
     new_key[SECURITY_KEY_LENGTH] = '\0';
     
     Message* key_rotation = malloc(sizeof(Message));
     if (!key_rotation) {
-        LOG_MESSAGE(LOG_ERROR, "Failed to allocate memory for key rotation message");
+        LOG_MESSAGE(LOG_ERROR, "SEC: Key rotation failed - memory error");
         return NULL;
     }
     
@@ -241,7 +213,7 @@ Message* rotate_session_key(void) {
     prepare_message(key_rotation);
     
     strncpy(session_key, new_key, SECURITY_KEY_LENGTH + 1);
-    LOG_MESSAGE(LOG_INFO, "New session key generated");
+    LOG_MESSAGE(LOG_INFO, "SEC: Key rotation complete");
     
     return key_rotation;
 }

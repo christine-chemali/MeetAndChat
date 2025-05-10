@@ -9,12 +9,18 @@ static ULONGLONG g_last_query_time = 0;
 
 //Cpu usage
 double get_cpu_usage(void) {
+    char log_buffer[256];
     FILETIME idleTime, kernelTime, userTime;
     static ULARGE_INTEGER lastIdleTime = {0};
     static ULARGE_INTEGER lastKernelTime = {0};
     static ULARGE_INTEGER lastUserTime = {0};
 
-    GetSystemTimes((LPFILETIME)&idleTime, (LPFILETIME)&kernelTime, (LPFILETIME)&userTime);
+    if (!GetSystemTimes((LPFILETIME)&idleTime, (LPFILETIME)&kernelTime, (LPFILETIME)&userTime)) {
+        snprintf(log_buffer, sizeof(log_buffer),
+            "METRICS: Failed to get CPU times");
+        log_server_message(LOG_ERROR, log_buffer);
+        return 0.0;
+    }
 
     ULARGE_INTEGER idle, kernel, user;
     idle.LowPart = idleTime.dwLowDateTime;
@@ -34,40 +40,73 @@ double get_cpu_usage(void) {
     lastUserTime = user;
 
     ULONGLONG totalTime = kernelDiff.QuadPart + userDiff.QuadPart;
-    if(totalTime == 0) return 0.0;
+    if(totalTime == 0) {
+        snprintf(log_buffer, sizeof(log_buffer),
+            "METRICS: Zero total CPU time detected");
+        log_server_message(LOG_WARNING, log_buffer);
+        return 0.0;
+    }
 
     return (double)(totalTime - idleDiff.QuadPart) * 100.0 / totalTime;
 }
 
 //memory usage
 double get_memory_usage(void) {
+    char log_buffer[256];
     MEMORYSTATUSEX memInfo;
     memInfo.dwLength = sizeof(MEMORYSTATUSEX);
-    GlobalMemoryStatusEx(&memInfo);
+    
+    if (!GlobalMemoryStatusEx(&memInfo)) {
+        snprintf(log_buffer, sizeof(log_buffer),
+            "METRICS: Failed to get memory status");
+        log_server_message(LOG_ERROR, log_buffer);
+        return 0.0;
+    }
+    
     return (double)memInfo.dwMemoryLoad;
 }
 
-//inactive connections
+//active connections
 int get_active_connections(void) {
+    char log_buffer[256];
+    snprintf(log_buffer, sizeof(log_buffer),
+        "METRICS: Active connections count: %d",
+        g_active_connections);
+    log_server_message(LOG_DEBUG, log_buffer);
     return g_active_connections;
 }
 
 //Queries per sec
 int get_queries_per_second(void) {
+    char log_buffer[256];
     ULONGLONG currentTime = GetTickCount64();
     ULONGLONG timeDiff = currentTime - g_last_query_time;
     
-    if(timeDiff == 0) return 0;
+    if(timeDiff == 0) {
+        snprintf(log_buffer, sizeof(log_buffer),
+            "METRICS: Zero time difference for QPS calculation");
+        log_server_message(LOG_WARNING, log_buffer);
+        return 0;
+    }
     
     int qps = (int)(g_queries_count * 1000.0 / timeDiff);
     g_queries_count = 0;
     g_last_query_time = currentTime;
+    
+    snprintf(log_buffer, sizeof(log_buffer),
+        "METRICS: Current QPS: %d", qps);
+    log_server_message(LOG_DEBUG, log_buffer);
     
     return qps;
 }
 
 //Performance Monitor thread
 DWORD WINAPI performanceMonitorThread(LPVOID lpParam) {
+    char log_buffer[256];
+    snprintf(log_buffer, sizeof(log_buffer),
+        "METRICS: Starting performance monitoring");
+    log_server_message(LOG_INFO, log_buffer);
+
     while(1) {
         ServerMetrics metrics = {
             .cpu_usage = get_cpu_usage(),
@@ -75,6 +114,12 @@ DWORD WINAPI performanceMonitorThread(LPVOID lpParam) {
             .active_connections = get_active_connections(),
             .queries_per_second = get_queries_per_second()
         };
+
+        snprintf(log_buffer, sizeof(log_buffer),
+            "METRICS: CPU: %.2f%%, MEM: %.2f%%, CONN: %d, QPS: %d",
+            metrics.cpu_usage, metrics.memory_usage,
+            metrics.active_connections, metrics.queries_per_second);
+        log_server_message(LOG_PERFORMANCE, log_buffer);
 
         log_performance_metrics(&metrics);
         Sleep(60000); // Wait 1 minute before next check

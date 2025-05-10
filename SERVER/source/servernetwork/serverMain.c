@@ -8,31 +8,37 @@
 #include <stdio.h>
 
 int main() {
+    char log_buffer[256];
+
     // Load config
     ServerConfig config;
     if (!load_server_config("server_config.ini", &config)) {
-        printf("Failed to load configuration\n");
+        snprintf(log_buffer, sizeof(log_buffer),
+            "INIT: Configuration load failed");
+        printf("%s\n", log_buffer);
         return 1;
     }
 
     // Init logging
     if (!init_server_logging(get_db_connection_string(&config))) {
-        printf("Failed to initialize server logging\n");
+        snprintf(log_buffer, sizeof(log_buffer),
+            "INIT: Logging initialization failed");
+        printf("%s\n", log_buffer);
         return 1;
     }
-    log_server_message(LOG_INFO, "Server starting...");
+    log_server_message(LOG_INFO, "INIT: Server starting");
 
     // Init database
     if (!init_server_database(get_db_connection_string(&config))) {
-        log_server_message(LOG_ERROR, "Failed to initialize database");
+        log_server_message(LOG_ERROR, "INIT: Database initialization failed");
         close_server_logging();
         return 1;
     }
-    log_server_message(LOG_INFO, "Database initialized successfully");
+    log_server_message(LOG_INFO, "INIT: Database initialized");
 
     // Init Winsock
     if (!initWinsock()) {
-        log_server_message(LOG_ERROR, "Failed to initialize Winsock");
+        log_server_message(LOG_ERROR, "INIT: Winsock initialization failed");
         close_server_database();
         close_server_logging();
         return 1;
@@ -40,7 +46,7 @@ int main() {
 
     //Init security
     if (!initialize_security()) {
-        log_server_message(LOG_ERROR, "Failed to initialize security");
+        log_server_message(LOG_ERROR, "INIT: Security initialization failed");
         WSACleanup();
         close_server_database();
         close_server_logging();
@@ -50,7 +56,7 @@ int main() {
     //Create server socket
     SOCKET serverSocket = createSocket();
     if (serverSocket == INVALID_SOCKET) {
-        log_server_message(LOG_ERROR, "Failed to create server socket");
+        log_server_message(LOG_ERROR, "INIT: Server socket creation failed");
         WSACleanup();
         close_server_database();
         close_server_logging();
@@ -61,7 +67,7 @@ int main() {
 
     //bind server
     if (bindServer(serverSocket, &serverAddress) == 1) {
-        log_server_message(LOG_ERROR, "Failed to bind server");
+        log_server_message(LOG_ERROR, "INIT: Server bind failed");
         WSACleanup();
         close_server_database();
         close_server_logging();
@@ -70,40 +76,49 @@ int main() {
 
     //listen to connection
     if (listenConnection(serverSocket) == 1) {
-        log_server_message(LOG_ERROR, "Failed to listen for connections");
+        log_server_message(LOG_ERROR, "INIT: Listen failed");
         WSACleanup();
         close_server_database();
         close_server_logging();
         return 1;
     }
 
-    log_server_message(LOG_INFO, "Server started successfully, waiting for connections");
+    snprintf(log_buffer, sizeof(log_buffer),
+        "INIT: Server started on port %d", config.server_port);
+    log_server_message(LOG_INFO, log_buffer);
 
     // Metrics perform thread 
     HANDLE metricsThread = CreateThread(NULL, 0, performanceMonitorThread, NULL, 0, NULL);
     if (metricsThread == NULL) {
-        log_server_message(LOG_ERROR, "Failed to create metrics thread");
+        log_server_message(LOG_ERROR, "INIT: Metrics thread creation failed");
     }
 
     while(1) {
         SOCKET clientSocket = accept(serverSocket, NULL, NULL);
         if (clientSocket == INVALID_SOCKET) {
-            char error_msg[256];
-            snprintf(error_msg, sizeof(error_msg), "Connection failed, error: %d", WSAGetLastError());
-            log_server_message(LOG_ERROR, error_msg);
+            snprintf(log_buffer, sizeof(log_buffer),
+                "CONN: Accept failed with error %d", WSAGetLastError());
+            log_server_message(LOG_ERROR, log_buffer);
             continue;
         }
 
         if (!handle_new_connection(clientSocket)) {
-            log_server_message(LOG_WARNING, "Failed to handle new connection");
+            snprintf(log_buffer, sizeof(log_buffer),
+                "CONN: Handler failed for socket %d", (int)clientSocket);
+            log_server_message(LOG_WARNING, log_buffer);
             closesocket(clientSocket);
+            continue;
         }
 
-        log_server_message(LOG_INFO, "New client connected");
+        snprintf(log_buffer, sizeof(log_buffer),
+            "CONN: New connection on socket %d", (int)clientSocket);
+        log_server_message(LOG_INFO, log_buffer);
 
         SOCKET* clientPtr = malloc(sizeof(SOCKET));
         if (clientPtr == NULL) {
-            log_server_message(LOG_ERROR, "Failed to allocate memory for client socket");
+            snprintf(log_buffer, sizeof(log_buffer),
+                "CONN: Memory allocation failed for socket %d", (int)clientSocket);
+            log_server_message(LOG_ERROR, log_buffer);
             closesocket(clientSocket);
             continue;
         }

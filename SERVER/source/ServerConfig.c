@@ -16,9 +16,13 @@ static char connection_string[512];
 
 //load server config
 bool load_server_config(const char *filename, ServerConfig *config) {
+    char log_buffer[256];
+    
     FILE *file = fopen(filename, "r");
     if (!file) {
-        log_server_message(LOG_ERROR, "Failed to open config file");
+        snprintf(log_buffer, sizeof(log_buffer),
+            "CFG: Cannot access configuration file");
+        log_server_message(LOG_ERROR, log_buffer);
         return false;
     }
 
@@ -26,21 +30,30 @@ bool load_server_config(const char *filename, ServerConfig *config) {
     char section[64] = "";
 
     while (fgets(line, sizeof(line), file)) {
-        // Remove newline
         line[strcspn(line, "\n")] = 0;
-        
-        // Skip empty lines and comments
         if (line[0] == '\0' || line[0] == '#') continue;
 
-        // Check for section
         if (line[0] == '[' && line[strlen(line)-1] == ']') {
             strncpy(section, line + 1, strlen(line) - 2);
             section[strlen(line) - 2] = '\0';
+            
+            snprintf(log_buffer, sizeof(log_buffer),
+                "CFG: Processing section [%s]", section);
+            log_server_message(LOG_DEBUG, log_buffer);
             continue;
         }
 
         char key[64], value[256];
         if (sscanf(line, "%[^=]=%s", key, value) == 2) {
+            // Ne pas logger les valeurs sensibles
+            if (strcmp(key, "password") != 0 && 
+                strcmp(key, "pepper") != 0 &&
+                strcmp(key, "user") != 0) {
+                snprintf(log_buffer, sizeof(log_buffer),
+                    "CFG: Loaded %s.%s", section, key);
+                log_server_message(LOG_DEBUG, log_buffer);
+            }
+
             if (strcmp(section, "database") == 0) {
                 if (strcmp(key, "host") == 0) strncpy(config->db_host, value, sizeof(config->db_host)-1);
                 else if (strcmp(key, "port") == 0) strncpy(config->db_port, value, sizeof(config->db_port)-1);
@@ -67,29 +80,56 @@ bool load_server_config(const char *filename, ServerConfig *config) {
     }
 
     fclose(file);
+    
+    snprintf(log_buffer, sizeof(log_buffer),
+        "CFG: Configuration file processed");
+    log_server_message(LOG_INFO, log_buffer);
+    
     return validate_config(config);
 }
 
 //Return connection string
 char* get_db_connection_string(const ServerConfig *config) {
+    if (!config) {
+        log_server_message(LOG_ERROR, "CFG: Null config in connection string generation");
+        return NULL;
+    }
+
     snprintf(connection_string, sizeof(connection_string),
              "host=%s port=%s dbname=%s user=%s password=%s",
              config->db_host, config->db_port, config->db_name,
              config->db_user, config->db_password);
+             
+    log_server_message(LOG_DEBUG, "CFG: Database connection string generated");
     return connection_string;
 }
 
 //Validate config
 bool validate_config(const ServerConfig *config) {
-    if (strlen(config->db_host) == 0 || 
-        strlen(config->db_port) == 0 || 
-        strlen(config->db_name) == 0 || 
-        strlen(config->db_user) == 0 || 
-        strlen(config->db_password) == 0 || 
-        strlen(config->pepper) == 0) {
-        log_server_message(LOG_ERROR, "Invalid configuration: Missing required fields");
+    char log_buffer[256];
+    
+    if (!config) {
+        log_server_message(LOG_ERROR, "CFG: Null configuration");
         return false;
     }
+
+    // Liste des champs manquants sans exposer les valeurs
+    int missing = 0;
+    if (strlen(config->db_host) == 0) missing++;
+    if (strlen(config->db_port) == 0) missing++;
+    if (strlen(config->db_name) == 0) missing++;
+    if (strlen(config->db_user) == 0) missing++;
+    if (strlen(config->db_password) == 0) missing++;
+    if (strlen(config->pepper) == 0) missing++;
+
+    if (missing > 0) {
+        snprintf(log_buffer, sizeof(log_buffer),
+            "CFG: Configuration validation failed - %d required field(s) missing",
+            missing);
+        log_server_message(LOG_ERROR, log_buffer);
+        return false;
+    }
+
+    log_server_message(LOG_INFO, "CFG: Configuration validated successfully");
     return true;
 }
-

@@ -202,7 +202,7 @@ void handle_client_message(ClientSession* session, Message* msg) {
     switch(msg->type) {
         case LOGIN_REQUEST: {
             snprintf(log_buffer, sizeof(log_buffer), 
-                "MSG: Processing login request from socket %d", 
+                "MSG: Login attempt from socket %d", 
                 (int)session->clientSocket);
             log_server_message(LOG_INFO, log_buffer);
             handle_login_request(session, msg);
