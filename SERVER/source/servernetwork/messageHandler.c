@@ -13,21 +13,34 @@
 
 static bool security_initialized = false;
 
+
 // To validate message lenght
-static bool validate_message_length(int length) {
+static bool validate_message_length(int length, int message_type) {
+
+    if (message_type == HEARTBEAT) {
+        return length == 0;
+    }
+
     return (length >= MIN_MESSAGE_LENGTH && length <= MAX_MESSAGE_LENGTH);
+}
+
+// Frees a message's allocated memory
+void free_message(Message* msg) {
+    if (msg) free(msg);
 }
 
 // Receives message 
 Message* receive_message(SOCKET socket) {
+    char log_buffer[256];
+    
     if (socket == INVALID_SOCKET) {
-        log_server_message(LOG_ERROR, "Invalid socket provided");
+        log_server_message(LOG_ERROR, "RCV: Invalid socket provided");
         return NULL;
     }
 
     Message* msg = malloc(sizeof(Message));
     if (!msg) {
-        log_server_message(LOG_ERROR, "Failed to allocate memory for message");
+        log_server_message(LOG_ERROR, "RCV: Memory allocation failed");
         return NULL;
     }
     memset(msg, 0, sizeof(Message));
@@ -37,144 +50,203 @@ Message* receive_message(SOCKET socket) {
     int remaining = sizeof(Message);
     char* buffer = (char*)msg;
 
+    snprintf(log_buffer, sizeof(log_buffer), "RCV: Starting message reception on socket %d", (int)socket);
+    log_server_message(LOG_DEBUG, log_buffer);
+
     while (total_received < remaining) {
         int received = recv(socket, buffer + total_received, remaining - total_received, 0);
         if (received <= 0) {
             int error = WSAGetLastError();
-            char error_msg[256];
-            snprintf(error_msg, sizeof(error_msg), "Connection lost during receive. Error: %d", error);
-            log_server_message(LOG_ERROR, error_msg);
+            snprintf(log_buffer, sizeof(log_buffer), "RCV: Connection lost. Error: %d", error);
+            log_server_message(LOG_ERROR, log_buffer);
             free(msg);
             return NULL;
         }
         total_received += received;
     }
 
-    // Special treatment for the heartbeat
-    if (msg->type == HEARTBEAT) {
-        log_server_message(LOG_DEBUG, "Received heartbeat message");
-        return msg;
-    }
+    snprintf(log_buffer, sizeof(log_buffer), "RCV: Received message type %d, length %d", msg->type, msg->length);
+    log_server_message(LOG_DEBUG, log_buffer);
 
     // Validate lenght before decrypting
-    if (!validate_message_length(msg->length)) {
-        char error_msg[256];
-        snprintf(error_msg, sizeof(error_msg), "Invalid message length received: %d", msg->length);
-        log_server_message(LOG_ERROR, error_msg);
+    if (!validate_message_length(msg->length, msg->type)) {
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "RCV: Invalid length %d for message type %d", 
+            msg->length, msg->type);
+        log_server_message(LOG_ERROR, log_buffer);
         free(msg);
         return NULL;
     }
 
     // decrypting message
     decrypt_message(msg, get_session_key());
+    
+    if (msg->length > 0) {
+        char hex_dump[48] = {0};
+        for (size_t i = 0; i < (msg->length > 8 ? 8 : msg->length); i++) {
+            sprintf(hex_dump + i*3, "%02X ", (unsigned char)msg->data[i]);
+        }
+        snprintf(log_buffer, sizeof(log_buffer), "RCV: Data preview: %s%s", 
+            hex_dump, msg->length > 8 ? "..." : "");
+        log_server_message(LOG_DEBUG, log_buffer);
+    }
 
     // Vérify checksum after decrypting
-    if (msg->length > 0) {
-        unsigned int calculated_checksum = calculate_checksum(msg->data, msg->length);
-        if (calculated_checksum != msg->checksum) {
-            char error_msg[256];
-            snprintf(error_msg, sizeof(error_msg), 
-                     "Checksum mismatch. Expected: %u, Got: %u", 
-                     msg->checksum, calculated_checksum);
-            log_server_message(LOG_ERROR, error_msg);
-            free(msg);
-            return NULL;
-        }
+    unsigned int calculated_checksum = calculate_checksum(msg->data, msg->length);
+    if (calculated_checksum != msg->checksum) {
+        snprintf(log_buffer, sizeof(log_buffer), "RCV: Checksum mismatch - Expected: %u, Got: %u",
+            msg->checksum, calculated_checksum);
+        log_server_message(LOG_ERROR, log_buffer);
+        free(msg);
+        return NULL;
     }
 
     return msg;
 }
 
-// Frees a message's allocated memory
-void free_message(Message* msg) {
-    if (msg) free(msg);
+Message* create_heartbeat_message() {
+    char log_buffer[256];
+    
+    Message* msg = malloc(sizeof(Message));
+    if (!msg) {
+        log_server_message(LOG_ERROR, "HB: Failed to allocate heartbeat message");
+        return NULL;
+    }
+    
+    memset(msg, 0, sizeof(Message));
+    msg->type = HEARTBEAT;
+    msg->length = 0;
+    msg->checksum = 0;  
+    
+    snprintf(log_buffer, sizeof(log_buffer), 
+        "HB: Created heartbeat message (type: %d, length: %d, checksum: %u)", 
+        msg->type, msg->length, msg->checksum);
+    log_server_message(LOG_DEBUG, log_buffer);
+    
+    return msg;
 }
 
 // Send message to client
 bool send_message_to_client(ClientSession* session, Message* msg) {
-    if (!msg || !session) return false;
+    char log_buffer[256];
+    if (!msg || !session) {
+        log_server_message(LOG_ERROR, "SND: Null message or session");
+        return false;
+    }
 
     Message send_msg;
     memset(&send_msg, 0, sizeof(Message));
     memcpy(&send_msg, msg, sizeof(Message));
+    
+    snprintf(log_buffer, sizeof(log_buffer), "SND: Preparing message type %d, length %d", 
+        send_msg.type, send_msg.length);
+    log_server_message(LOG_DEBUG, log_buffer);
 
-    // special treatment for heartbeat no cheksum
-    if (send_msg.type == HEARTBEAT) {
-        send_msg.length = 0;
-        send_msg.checksum = 0;  
-    } else {
-        send_msg.checksum = calculate_checksum(send_msg.data, send_msg.length);
+    prepare_message(&send_msg);
+    
+    if (send_msg.length > 0) {
+        char hex_dump[48] = {0};
+        for (size_t i = 0; i < (send_msg.length > 8 ? 8 : send_msg.length); i++) {
+            sprintf(hex_dump + i*3, "%02X ", (unsigned char)send_msg.data[i]);
+        }
+        snprintf(log_buffer, sizeof(log_buffer), "SND: Data preview: %s%s", 
+            hex_dump, send_msg.length > 8 ? "..." : "");
+        log_server_message(LOG_DEBUG, log_buffer);
     }
 
+    //encrypt message
     encrypt_message(&send_msg, get_session_key());
 
+    time_t start_time = time(NULL);
     int total_size = sizeof(Message);
     int sent = send(session->clientSocket, (char*)&send_msg, total_size, 0);
     
-    return (sent == total_size);
-}
+    time_t end_time = time(NULL);
+    double elapsed_time = difftime(end_time, start_time);
 
-// Create heartbeat message
-Message* create_heartbeat_message() {
-    Message* msg = malloc(sizeof(Message));
-    if (!msg) return NULL;
-    
-    msg->length = 0;
-    msg->type = HEARTBEAT;
-    msg->checksum = calculate_checksum(msg->data, msg->length);
-    
-    return msg;
+    if (sent == total_size) {
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "SND: Message sent successfully in %.1f seconds", elapsed_time);
+        log_server_message(LOG_INFO, log_buffer);
+        return true;
+    } else {
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "SND: Failed to send message after %.1f seconds", elapsed_time);
+        log_server_message(LOG_ERROR, log_buffer);
+        return false;
+    }
 }
 
 // Processes a client message based on its type
 void handle_client_message(ClientSession* session, Message* msg) {
+    char log_buffer[256];
+    
     if (!msg || !session) {
-        log_server_message(LOG_ERROR, "Null message or session");
+        log_server_message(LOG_ERROR, "MSG: Null message or session");
         return;
     }
 
-    // Special treatment for heatbeat had to be before verifiying lenght and checksum
-    if (msg->type == HEARTBEAT) {
-        Message response;
-        memset(&response, 0, sizeof(Message));
-        response.type = HEARTBEAT;
-        response.length = 0;
-        response.checksum = 0;
-        
-        if (!send_message_to_client(session, &response)) {
-            log_server_message(LOG_ERROR, "Failed to send heartbeat response");
-        }
-        return;
-    }
+    snprintf(log_buffer, sizeof(log_buffer), 
+        "MSG: Processing message type %d from %s", 
+        msg->type,
+        session->username ? session->username : "unknown");
+    log_server_message(LOG_DEBUG, log_buffer);
 
     // Switch
     switch(msg->type) {
         case LOGIN_REQUEST: {
-            log_server_message(LOG_INFO, "Processing login request");
+            snprintf(log_buffer, sizeof(log_buffer), "MSG: Processing login request from socket %d", 
+                (int)session->clientSocket);
+            log_server_message(LOG_INFO, log_buffer);
             handle_login_request(session, msg);
             break;
         }
            
         case LOGOUT: {
-            log_server_message(LOG_INFO, "Processing logout request");
+            snprintf(log_buffer, sizeof(log_buffer), "MSG: Processing logout request from %s", 
+                session->username ? session->username : "unknown");
+            log_server_message(LOG_INFO, log_buffer);
             handle_logout_request(session);
             break;
         }
     
         case HEARTBEAT: {
-            // TODO : ADD CODE FOR HEARTBEAT
+            snprintf(log_buffer, sizeof(log_buffer), "MSG: Processing heartbeat from %s", 
+                session->username ? session->username : "unknown");
+            log_server_message(LOG_DEBUG, log_buffer);
+            
+            Message* response = create_heartbeat_message();
+            if (!response) {
+                log_server_message(LOG_ERROR, "MSG: Failed to create heartbeat response");
+                break;
+            }
+            
+            if (!send_message_to_client(session, response)) {
+                log_server_message(LOG_ERROR, "MSG: Failed to send heartbeat response");
+            }
+            
+            free(response);
             break;
         }
     
         default: {
-            char unknown_msg[256];
-            snprintf(unknown_msg, sizeof(unknown_msg), 
-                    "Unknown message type received: %d from %s", 
-                    msg->type,
-                    session->username ? session->username : "unknown");
-            log_server_message(LOG_WARNING, unknown_msg);
+            snprintf(log_buffer, sizeof(log_buffer), 
+                "MSG: Unknown message type %d from %s", 
+                msg->type,
+                session->username ? session->username : "unknown");
+            log_server_message(LOG_WARNING, log_buffer);
         }
     }
+
     // Update activity timestamp
-    session->lastActivity = time(NULL);
-} 
+    time_t current_time = time(NULL);
+    time_t idle_time = current_time - session->lastActivity;
+    
+    snprintf(log_buffer, sizeof(log_buffer), 
+        "MSG: Updated activity timestamp for %s (idle for %ld seconds)", 
+        session->username ? session->username : "unknown",
+        (long)idle_time);
+    log_server_message(LOG_DEBUG, log_buffer);
+    
+    session->lastActivity = current_time;
+}

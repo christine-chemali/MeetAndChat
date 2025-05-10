@@ -9,23 +9,25 @@
 
 // Send a message to the server
 bool send_message_to_server(Message* msg) {
+    char log_buffer[256];
+    
     if (!check_connection_status()) {
-        log_client_message(LOG_ERROR, "Connection check failed");
+        log_client_message(LOG_ERROR, "SND: Connection check failed");
         return false;
     }
 
     ClientSession* session = get_current_session();
     if (!msg || !session) {
-        log_client_message(LOG_ERROR, "Invalid message or session");
+        log_client_message(LOG_ERROR, "SND: Invalid message or session");
         return false;
     }
 
-    if (session->socket == INVALID_SOCKET) {
-        log_client_message(LOG_ERROR, "Invalid socket in session");
-        return false;
-    }
+    snprintf(log_buffer, sizeof(log_buffer), 
+        "SND: Preparing to send message type %d (struct size: %zu)", 
+        msg->type, sizeof(Message));
+    log_client_message(LOG_DEBUG, log_buffer);
 
-    // Create a copy of the message to send it 
+    // Create a copy of the message
     Message send_msg;
     memset(&send_msg, 0, sizeof(Message));
 
@@ -34,79 +36,42 @@ bool send_message_to_server(Message* msg) {
         send_msg.type = HEARTBEAT;
         send_msg.length = 0;
         send_msg.checksum = 0;
+        memset(send_msg.data, 0, sizeof(send_msg.data));
+        memset(send_msg.padding, 0, sizeof(send_msg.padding));
         
-        char log_msg[64];
-        snprintf(log_msg, sizeof(log_msg), "Sending heartbeat message");
-        log_client_message(LOG_DEBUG, log_msg);
-
-        int total_sent = 0;
-        int remaining = sizeof(Message);
-        char* buffer = (char*)&send_msg;
-
-        while (total_sent < remaining) {
-            int sent = send(session->socket, buffer + total_sent, remaining - total_sent, 0);
-            if (sent <= 0) {
-                int error = WSAGetLastError();
-                char error_msg[256];
-                snprintf(error_msg, sizeof(error_msg), "Heartbeat send failed with error: %d", error);
-                log_client_message(LOG_ERROR, error_msg);
-                return false;
-            }
-            total_sent += sent;
-        }
-
-        return true;
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "SND: Sending heartbeat (message size: %zu)", sizeof(Message));
+        log_client_message(LOG_DEBUG, log_buffer);
+    } else {
+        memcpy(&send_msg, msg, sizeof(Message));
+        prepare_message(&send_msg);
+        encrypt_message(&send_msg, get_session_key());
     }
-
-    //For all others message types
-    if (msg->length > MAX_MESSAGE_LENGTH || msg->length < 0) {
-        char error_msg[256];
-        snprintf(error_msg, sizeof(error_msg), "Invalid message length: %d", msg->length);
-        log_client_message(LOG_ERROR, error_msg);
-        return false;
-    }
-
-    // Copy and prepare message
-    memcpy(&send_msg, msg, sizeof(Message));
-    
-    // Log befor encryption
-    char msg_info[256];
-    snprintf(msg_info, sizeof(msg_info), "Preparing to send message - Type: %d, Length: %d", 
-             send_msg.type, send_msg.length);
-    log_client_message(LOG_INFO, msg_info);
-
-    // Calculate checksum before encryption
-    if (send_msg.length > 0) {
-        send_msg.checksum = calculate_checksum(send_msg.data, send_msg.length);
-    }
-
-    // Encryption 
-    encrypt_message(&send_msg, get_session_key());
 
     // Send message
+    size_t message_size = sizeof(Message);
     int total_sent = 0;
-    int remaining = sizeof(Message);
     char* buffer = (char*)&send_msg;
 
-    while (total_sent < remaining) {
-        int sent = send(session->socket, buffer + total_sent, remaining - total_sent, 0);
+    while (total_sent < message_size && isConnected) {
+        int to_send = (int)(message_size - total_sent);
+        int sent = send(session->socket, buffer + total_sent, to_send, 0);
+        
         if (sent <= 0) {
             int error = WSAGetLastError();
-            char error_msg[256];
-            snprintf(error_msg, sizeof(error_msg), "Message send failed with error: %d", error);
-            log_client_message(LOG_ERROR, error_msg);
-            
-            // Decrypt message for login
-            decrypt_message(&send_msg, get_session_key());
+            snprintf(log_buffer, sizeof(log_buffer), 
+                "SND: Send failed (type: %d, error: %d)", 
+                send_msg.type, error);
+            log_client_message(LOG_ERROR, log_buffer);
             return false;
         }
         total_sent += sent;
     }
 
-    // Log after a successful sending message
-    snprintf(msg_info, sizeof(msg_info), "Message sent successfully - Type: %d, Bytes sent: %d", 
-             send_msg.type, total_sent);
-    log_client_message(LOG_INFO, msg_info);
+    snprintf(log_buffer, sizeof(log_buffer), 
+        "SND: Message sent successfully (type: %d, bytes: %d)", 
+        send_msg.type, total_sent);
+    log_client_message(LOG_DEBUG, log_buffer);
 
     return true;
 }

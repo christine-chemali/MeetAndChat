@@ -62,20 +62,40 @@ DWORD WINAPI clientThread(LPVOID lpParam) {
 
 // Handle receiving client requests
 DWORD WINAPI recvThread(LPVOID lpParam) {
+    char log_buffer[256];
     ClientSession* session = (ClientSession*)lpParam;
-    if (!session) return 1;
+    if (!session) {
+        log_server_message(LOG_ERROR, "RECV: Null session parameter");
+        return 1;
+    }
+
+    snprintf(log_buffer, sizeof(log_buffer), 
+        "RECV: Starting receive thread for socket %d", 
+        (int)session->clientSocket);
+    log_server_message(LOG_INFO, log_buffer);
 
     while (1) {
+        log_server_message(LOG_DEBUG, "RECV: Waiting for next message...");
+        
         Message* msg = receive_message(session->clientSocket);
         if (!msg) {
-            printf("Client disconnected\n");
+            snprintf(log_buffer, sizeof(log_buffer), 
+                "RECV: Connection lost on socket %d", 
+                (int)session->clientSocket);
+            log_server_message(LOG_ERROR, log_buffer);
             break;
         }
         
-        decrypt_message(msg, get_session_key());
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "RECV: Got message type %d from socket %d", 
+            msg->type, (int)session->clientSocket);
+        log_server_message(LOG_DEBUG, log_buffer);
         
         if (!verify_message_checksum(msg)) {
-            printf("Invalid message checksum\n");
+            snprintf(log_buffer, sizeof(log_buffer), 
+                "RECV: Checksum verification failed for message type %d", 
+                msg->type);
+            log_server_message(LOG_ERROR, log_buffer);
             free_message(msg);
             continue;
         }
@@ -85,8 +105,13 @@ DWORD WINAPI recvThread(LPVOID lpParam) {
     }
     
     if (session->isAuthenticated) {
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "RECV: Handling logout for authenticated user %s", 
+            session->username ? session->username : "unknown");
+        log_server_message(LOG_INFO, log_buffer);
         handle_logout_request(session);
     }
+
     closesocket(session->clientSocket);
     free(session);
     return 0;

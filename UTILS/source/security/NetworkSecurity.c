@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 // to compile including the right header depending on client or server side 
 #ifdef IS_CLIENT
@@ -100,37 +101,57 @@ char* get_session_key(void) {
         return checksum;
     }
 
-// Verify if the message's checksum matches its data
-bool verify_message_checksum(Message* msg) {
-    if (!msg) {
-        LOG_MESSAGE(LOG_ERROR, "Null message pointer in checksum verification");
-        return false;
+    // Verify if the message's checksum matches its data
+    bool verify_message_checksum(Message* msg) {
+        char log_buffer[256];
+        
+        if (!msg) {
+            LOG_MESSAGE(LOG_ERROR, "SEC: Null message pointer in checksum verification");
+            return false;
+        }
+    
+        // for heartbeats accept 0 for lenght
+        if (msg->type == HEARTBEAT) {
+            if (msg->length != 0) {
+                snprintf(log_buffer, sizeof(log_buffer), 
+                    "SEC: Invalid heartbeat length: %d (should be 0)", msg->length);
+                LOG_MESSAGE(LOG_ERROR, log_buffer);
+                return false;
+            }
+            return true;
+        }
+    
+        // for other messages : stantard verification 
+        if (msg->length < 0 || msg->length > MAX_MESSAGE_LENGTH) {
+            snprintf(log_buffer, sizeof(log_buffer), 
+                "SEC: Invalid message length: %d", msg->length);
+            LOG_MESSAGE(LOG_ERROR, log_buffer);
+            return false;
+        }
+    
+        // Verify real data lenght 
+        size_t actual_length = strnlen(msg->data, MAX_MESSAGE_LENGTH);
+        if (actual_length != msg->length) {
+            snprintf(log_buffer, sizeof(log_buffer), 
+                "SEC: Length mismatch (declared: %d, actual: %zu)", 
+                msg->length, actual_length);
+            LOG_MESSAGE(LOG_ERROR, log_buffer);
+            return false;
+        }
+    
+        // Calcul and compare checksum
+        unsigned int calculated = calculate_checksum(msg->data, msg->length);
+        if (calculated != msg->checksum) {
+            snprintf(log_buffer, sizeof(log_buffer), 
+                "SEC: Checksum mismatch (expected: %u, got: %u)",
+                msg->checksum, calculated);
+            LOG_MESSAGE(LOG_WARNING, log_buffer);
+            return false;
+        }
+    
+        LOG_MESSAGE(LOG_DEBUG, "SEC: Message checksum verification successful");
+        return true;
     }
-
-    // Verifying declared lenght
-    if (msg->length <= 0 || msg->length > MAX_MESSAGE_LENGTH) {
-        LOG_MESSAGE(LOG_ERROR, "Invalid message length: %d");
-        return false;
-    }
-
-    // Verify real data lenght 
-    size_t actual_length = strnlen(msg->data, MAX_MESSAGE_LENGTH);
-    if (actual_length != msg->length) {
-        LOG_MESSAGE(LOG_ERROR, 
-            "Data length mismatch (declared: %d, actual: %zu)");
-        return false;
-    }
-
-    // Calcul and compare checksum
-    unsigned int calculated = calculate_checksum(msg->data, msg->length);
-    if (calculated != msg->checksum) {
-        LOG_MESSAGE(LOG_WARNING, 
-            "Checksum mismatch (expected: %u, got: %u)");
-        return false;
-    }
-
-    return true;
-}
 
 // Prepares the message by calculating its checksum
 void prepare_message(Message* msg) {
