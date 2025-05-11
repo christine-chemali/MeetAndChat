@@ -38,4 +38,4 @@ void cleanup_network(void);
 void handle_network_error(void);
 void disconnect_from_server(void);
 
-#endif 
+#endif

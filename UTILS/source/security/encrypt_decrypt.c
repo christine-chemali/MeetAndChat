@@ -4,24 +4,29 @@
 #include <time.h>
 #include <stdbool.h>
 
-bool verify_message_integrity(const char* original, const char* decrypted) {
-    return strcmp(original, decrypted) == 0;
+bool verify_message_integrity(const char* original, const char* decrypted, size_t length) {
+    return memcmp(original, decrypted, length) == 0;
 }
 
-void xor_cipher(char *message, const char *key) {
-    int key_len = strlen(key);
-    int i = 0;
-    while (*message) {
-        *message = *message ^ key[i % key_len];
-        message++;
-        i++;
+void xor_cipher(char *message, const char *key, size_t message_length) {
+    size_t key_len = strlen(key);
+    
+    for (size_t i = 0; i < message_length; i++) {
+        message[i] ^= key[i % key_len];
     }
 }
 
 void generate_random_key(char *key, int length) {
-    const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    srand(time(NULL)); // Initialize the random number generator
-    // srand((unsigned int)time(NULL)); // Initialize the random number generator  
+    static bool seeded = false;
+    static unsigned int seed;
+    
+    if (!seeded) {
+        seed = (unsigned int)time(NULL);
+        srand(seed);
+        seeded = true;
+    }
+    
+    const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
     
     for (int i = 0; i < length; i++) {
         int index = rand() % (sizeof(charset) - 1);
@@ -29,5 +34,3 @@ void generate_random_key(char *key, int length) {
     }
     key[length] = '\0';
 }
-
-//vs

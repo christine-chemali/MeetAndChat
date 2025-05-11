@@ -38,10 +38,10 @@ bool send_message_to_server(Message* msg) {
     // Create a copy of the message
     Message send_msg;
     memset(&send_msg, 0, sizeof(Message));
+    memcpy(&send_msg, msg, sizeof(Message));
 
-    // Special treatment for heartbeat
-    if (msg->type == HEARTBEAT) {
-        send_msg.type = HEARTBEAT;
+    // Special handling for different message types
+    if (send_msg.type == HEARTBEAT) {
         send_msg.length = 0;
         send_msg.checksum = 0;
         memset(send_msg.data, 0, MAX_MESSAGE_LENGTH);
@@ -50,8 +50,14 @@ bool send_message_to_server(Message* msg) {
             "SND: Sending heartbeat (message size: %zu)", sizeof(Message));
         log_client_message(LOG_DEBUG, log_buffer);
     } else {
-        memcpy(&send_msg, msg, sizeof(Message));
+        // Calculate checksum before encryption
         prepare_message(&send_msg);
+        
+        // Log checksum for debugging
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "SND: Message prepared with checksum: %u", send_msg.checksum);
+        log_client_message(LOG_DEBUG, log_buffer);
+        
         encrypt_message(&send_msg, get_session_key());
     }
 
@@ -73,6 +79,15 @@ bool send_message_to_server(Message* msg) {
             return false;
         }
         total_sent += sent;
+    }
+
+    // Verify if all data was sent
+    if (total_sent != message_size) {
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "SND: Incomplete send - only %d of %zu bytes sent", 
+            total_sent, message_size);
+        log_client_message(LOG_ERROR, log_buffer);
+        return false;
     }
 
     snprintf(log_buffer, sizeof(log_buffer), 

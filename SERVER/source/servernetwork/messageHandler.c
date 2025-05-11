@@ -45,13 +45,10 @@ Message* receive_message(SOCKET socket) {
     }
     memset(msg, 0, sizeof(Message));
 
-    // receiving the complete message
+    // Receiving the complete message
     int total_received = 0;
     int remaining = sizeof(Message);
     char* buffer = (char*)msg;
-
-    snprintf(log_buffer, sizeof(log_buffer), "RCV: Starting message reception on socket %d", (int)socket);
-    log_server_message(LOG_DEBUG, log_buffer);
 
     while (total_received < remaining) {
         int received = recv(socket, buffer + total_received, remaining - total_received, 0);
@@ -65,10 +62,7 @@ Message* receive_message(SOCKET socket) {
         total_received += received;
     }
 
-    snprintf(log_buffer, sizeof(log_buffer), "RCV: Received message type %d, length %d", msg->type, msg->length);
-    log_server_message(LOG_DEBUG, log_buffer);
-
-    // Validate lenght before decrypting
+    // Validate message length before decryption
     if (!validate_message_length(msg->length, msg->type)) {
         snprintf(log_buffer, sizeof(log_buffer), 
             "RCV: Invalid length %d for message type %d", 
@@ -78,27 +72,9 @@ Message* receive_message(SOCKET socket) {
         return NULL;
     }
 
-    // decrypting message
-    decrypt_message(msg, get_session_key());
-    
-    if (msg->length > 0) {
-        char hex_dump[48] = {0};
-        for (size_t i = 0; i < (msg->length > 8 ? 8 : msg->length); i++) {
-            sprintf(hex_dump + i*3, "%02X ", (unsigned char)msg->data[i]);
-        }
-        snprintf(log_buffer, sizeof(log_buffer), "RCV: Data preview: %s%s", 
-            hex_dump, msg->length > 8 ? "..." : "");
-        log_server_message(LOG_DEBUG, log_buffer);
-    }
-
-    // Vérify checksum after decrypting
-    unsigned int calculated_checksum = calculate_checksum(msg->data, msg->length);
-    if (calculated_checksum != msg->checksum) {
-        snprintf(log_buffer, sizeof(log_buffer), "RCV: Checksum mismatch - Expected: %u, Got: %u",
-            msg->checksum, calculated_checksum);
-        log_server_message(LOG_ERROR, log_buffer);
-        free(msg);
-        return NULL;
+    // Decrypt and verify checksum for non-heartbeat messages
+    if (msg->type != HEARTBEAT) {
+        decrypt_message(msg, get_session_key());
     }
 
     return msg;

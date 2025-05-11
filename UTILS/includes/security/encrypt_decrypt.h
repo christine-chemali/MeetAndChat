@@ -2,10 +2,10 @@
 #define ENCRYPT_DECRYPT_H
 
 #include <stdbool.h>
+#include <stddef.h>
 
-void xor_cipher(char *message, const char *key);
+bool verify_message_integrity(const char* original, const char* decrypted, size_t length);
+void xor_cipher(char *message, const char *key, size_t message_length);
 void generate_random_key(char *key, int length);
-bool verify_message_integrity(const char* original, const char* decrypted);
 
-#endif 
-//vs
+#endif

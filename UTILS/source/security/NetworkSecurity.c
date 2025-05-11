@@ -50,26 +50,66 @@ bool initialize_security(void) {
     return true;
 }
 
-// Encrypts the message using the provided key
+// Encrypt message
 void encrypt_message(Message* msg, const char* key) {
     if (!msg || !key || !is_security_initialized) {
         LOG_MESSAGE(LOG_ERROR, "SEC: Encryption failed - invalid state");
         return;
     }
+
+    if (msg->type == HEARTBEAT) {
+        msg->length = 0;
+        msg->checksum = 0;
+        memset(msg->data, 0, MAX_MESSAGE_LENGTH);
+        return;
+    }
+
+    // Calculate checksum on non encrypted data 
+    msg->checksum = calculate_checksum(msg->data, msg->length);
     
-    xor_cipher(msg->data, key);
-    LOG_MESSAGE(LOG_DEBUG, "SEC: Message encrypted");
+    // encrypt data
+    xor_cipher(msg->data, key, msg->length);
+
+    char log_buffer[256];
+    snprintf(log_buffer, sizeof(log_buffer), 
+        "SEC: Message encrypted with checksum: %u", msg->checksum);
+    LOG_MESSAGE(LOG_DEBUG, log_buffer);
 }
 
-// Decrypts the message using the provided key
+// decrypt message
 void decrypt_message(Message* msg, const char* key) {
     if (!msg || !key || !is_security_initialized) {
         LOG_MESSAGE(LOG_ERROR, "SEC: Decryption failed - invalid state");
         return;
     }
 
-    xor_cipher(msg->data, key);
-    LOG_MESSAGE(LOG_DEBUG, "SEC: Message decrypted");
+    if (msg->type == HEARTBEAT) {
+        return;
+    }
+
+    // Sauve original checksum
+    unsigned int original_checksum = msg->checksum;
+    
+    // Decrypt data
+    xor_cipher(msg->data, key, msg->length);
+    
+    // Calculate checksum on decrypted data
+    unsigned int calculated_checksum = calculate_checksum(msg->data, msg->length);
+
+    if (calculated_checksum != original_checksum) {
+        char log_buffer[256];
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "SEC: Checksum mismatch - Expected: %u, Got: %u", 
+            original_checksum, calculated_checksum);
+        LOG_MESSAGE(LOG_ERROR, log_buffer);
+        
+        // Re encrypt data in error cases
+        xor_cipher(msg->data, key, msg->length);
+        msg->checksum = original_checksum;
+        return;
+    }
+
+    LOG_MESSAGE(LOG_DEBUG, "SEC: Message decrypted successfully");
 }
 
 // Returns the current session key
