@@ -9,6 +9,10 @@
 #define SECURITY_KEY_LENGTH 32
 #define MAX_MESSAGE_LENGTH 1024
 
+// Session key used for encryption/decryption
+extern char session_key[SECURITY_KEY_LENGTH + 1];
+extern bool is_security_initialized;
+
 // Secure message structure
 typedef struct {
     Message msg;
@@ -33,4 +37,3 @@ Message* rotate_session_key(void);
 #endif
 
 #endif
-//cc

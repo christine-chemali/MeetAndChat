@@ -8,7 +8,7 @@
 #include "servernetwork/ServerSession.h"
 #include "serverlogging/ServerLogging.h" 
 
-//bind server
+// Funct to bind the server
 int bindServer(SOCKET serverSocket, struct sockaddr_in* address) {
     if (bind(serverSocket, (struct sockaddr*)address, sizeof(*address)) == SOCKET_ERROR) {
         printf("bind failed, error: %d \n ", WSAGetLastError());
@@ -20,7 +20,7 @@ int bindServer(SOCKET serverSocket, struct sockaddr_in* address) {
     }
 }
 
-//listen connection
+// Listen to connections
 int listenConnection(SOCKET serverSocket) {
     if (listen(serverSocket, SOMAXCONN) == SOCKET_ERROR) {
         printf("listen failed, error: %d", WSAGetLastError());
@@ -32,7 +32,7 @@ int listenConnection(SOCKET serverSocket) {
     }
 }
 
-// Client Thread
+// Client Thread 
 DWORD WINAPI clientThread(LPVOID lpParam) {
     SOCKET clientSocket = *(SOCKET*)lpParam;
     free(lpParam);
@@ -44,7 +44,15 @@ DWORD WINAPI clientThread(LPVOID lpParam) {
     }
 
     if (!initialize_security()) {
-        log_server_message(ERROR, "Security init failed for session");
+        log_server_message(LOG_ERROR, "Security initialization failed for session");
+        destroy_client_session(session);
+        closesocket(clientSocket);
+        return 1;
+    }
+
+    // Generate a new session key and sent it to client 
+    if (!send_session_key_to_client(session)) {
+        log_server_message(LOG_ERROR, "Failed to send session key to client");
         destroy_client_session(session);
         closesocket(clientSocket);
         return 1;
@@ -54,13 +62,13 @@ DWORD WINAPI clientThread(LPVOID lpParam) {
     if (recvHandle) {
         CloseHandle(recvHandle);
     } else {
-        log_server_message(ERROR, "Failed to create recv thread");
+        log_server_message(LOG_ERROR, "Failed to create receive thread");
     }
 
     return 0;
 }
 
-// Handle receiving client requests
+// Funct to receive messages
 DWORD WINAPI recvThread(LPVOID lpParam) {
     char log_buffer[256];
     ClientSession* session = (ClientSession*)lpParam;
@@ -117,19 +125,24 @@ DWORD WINAPI recvThread(LPVOID lpParam) {
     return 0;
 }
 
-// Handle new connection
+// Funct to handle new connections
 bool handle_new_connection(SOCKET clientSocket) {
     ClientSession* session = create_client_session(clientSocket);
     
-    // Generate a new key of each session 
+    if (!session) {
+        log_server_message(LOG_ERROR, "Failed to create client session");
+        closesocket(clientSocket);
+        return false;
+    }
+
     if (!initialize_security()) {
-        log_server_message(ERROR, "Session security init failed");
+        log_server_message(LOG_ERROR, "Session security initialization failed");
         closesocket(clientSocket);
         destroy_client_session(session);
         return false;
     }
-    
-    // Configurate client thread
+
+    // Config client thread
     DWORD threadId;
     HANDLE hThread = CreateThread(
         NULL, 
@@ -141,7 +154,7 @@ bool handle_new_connection(SOCKET clientSocket) {
     );
     
     if (!hThread) {
-        log_server_message(ERROR, "Thread creation failed");
+        log_server_message(LOG_ERROR, "Thread creation failed");
         closesocket(clientSocket);
         destroy_client_session(session);
         return false;
@@ -151,4 +164,26 @@ bool handle_new_connection(SOCKET clientSocket) {
     return true;
 }
 
+// Funct to send key session to client
+bool send_session_key_to_client(ClientSession* session) {
+    if (!session || !is_security_initialized) {
+        log_server_message(LOG_ERROR, "Failed to send session key: invalid session or security not initialized");
+        return false;
+    }
 
+    Message key_msg;
+    memset(&key_msg, 0, sizeof(Message));
+    key_msg.type = KEY_ROTATION;
+    strncpy(key_msg.data, session_key, sizeof(key_msg.data) - 1);
+    key_msg.length = strlen(key_msg.data);
+    prepare_message(&key_msg);
+    encrypt_message(&key_msg, get_session_key());
+
+    if (!send_message_to_client(session, &key_msg)) {
+        log_server_message(LOG_ERROR, "Failed to send session key to client");
+        return false;
+    }
+
+    log_server_message(LOG_INFO, "Session key sent successfully to client");
+    return true;
+}

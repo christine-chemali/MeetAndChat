@@ -40,7 +40,7 @@ bool send_message_to_server(Message* msg) {
     memset(&send_msg, 0, sizeof(Message));
     memcpy(&send_msg, msg, sizeof(Message));
 
-    // Special handling for different message types
+    // Handeling different type of messages
     if (send_msg.type == HEARTBEAT) {
         send_msg.length = 0;
         send_msg.checksum = 0;
@@ -53,7 +53,6 @@ bool send_message_to_server(Message* msg) {
         // Calculate checksum before encryption
         prepare_message(&send_msg);
         
-        // Log checksum for debugging
         snprintf(log_buffer, sizeof(log_buffer), 
             "SND: Message prepared with checksum: %u", send_msg.checksum);
         log_client_message(LOG_DEBUG, log_buffer);
@@ -81,7 +80,7 @@ bool send_message_to_server(Message* msg) {
         total_sent += sent;
     }
 
-    // Verify if all data was sent
+    // Verify if the sending is complete
     if (total_sent != message_size) {
         snprintf(log_buffer, sizeof(log_buffer), 
             "SND: Incomplete send - only %d of %zu bytes sent", 
@@ -98,24 +97,24 @@ bool send_message_to_server(Message* msg) {
     return true;
 }
 
-//Send generic message :TODO implement in all files where it is needed
+// Sending a generic message prototype
 bool send_generic_message(int type, const char* data, size_t length) {
     Message msg;
     char log_buffer[256];
     memset(&msg, 0, sizeof(Message));
     msg.type = type;
    
-    // Log the beginning of the function with the message type
+    // Log begining of the sending
     snprintf(log_buffer, sizeof(log_buffer), "Beginning to send a message of type %d", type);
     log_client_message(LOG_INFO, log_buffer);
    
-    // Check if data is provided
+    // Verifying if data is sent
     if (data && length > 0) {
-        // Log message details
+
         snprintf(log_buffer, sizeof(log_buffer), "Preparing a message with %zu bytes of data", length);
         log_client_message(LOG_DEBUG, log_buffer);
        
-        // Check if the message size is acceptable
+        // Verify data size
         if (length > sizeof(msg.data)) {
             snprintf(log_buffer, sizeof(log_buffer), 
                 "ERROR: Message size (%zu) exceeds maximum capacity (%zu)", 
@@ -124,13 +123,13 @@ bool send_generic_message(int type, const char* data, size_t length) {
             return false;
         }
         
-        // Copy data into the message
+        // Copying data message
         memcpy(msg.data, data, length);
         msg.length = length;
         
-        // Log the content of the message (first bytes if large)
+        // Logging first bytes: may not be relevant for confidentiality 
         if (length <= 16) {
-            // For small messages, we can display the entire content
+
             char hex_dump[48] = {0};
             for (size_t i = 0; i < length && i < 16; i++) {
                 sprintf(hex_dump + i*3, "%02X ", (unsigned char)data[i]);
@@ -138,7 +137,7 @@ bool send_generic_message(int type, const char* data, size_t length) {
             snprintf(log_buffer, sizeof(log_buffer), "Message content: %s", hex_dump);
             log_client_message(LOG_DEBUG, log_buffer);
         } else {
-            // For large messages, we just display the first bytes
+
             char hex_dump[48] = {0};
             for (size_t i = 0; i < 8; i++) {
                 sprintf(hex_dump + i*3, "%02X ", (unsigned char)data[i]);
@@ -148,22 +147,22 @@ bool send_generic_message(int type, const char* data, size_t length) {
             log_client_message(LOG_DEBUG, log_buffer);
         }
     } else {
-        // Log that this is a message without data
+
         log_client_message(LOG_DEBUG, "Sending a message without data");
     }
    
-    // Record the start time of sending
+    // Register time 
     time_t start_time = time(NULL);
     
-    // Send the message to the server
+    // Sending to server
     log_client_message(LOG_DEBUG, "Attempting to send the message...");
     bool result = send_message_to_server(&msg);
     
-    // Calculate the sending time
+    // Calculate time of the sending
     time_t end_time = time(NULL);
     double elapsed_time = difftime(end_time, start_time);
    
-    // Log the result of the sending
+    // result of the sending
     if (result) {
         snprintf(log_buffer, sizeof(log_buffer), 
             "Message of type %d sent successfully in %.1f seconds", type, elapsed_time);

@@ -4,7 +4,7 @@
 #include <windows.h>
 #include "utilsnetwork/Message.h"
 
-//External thread handles
+// External thread handles
 extern HANDLE networkThread;
 extern HANDLE heartbeatThread;
 
@@ -12,4 +12,8 @@ extern HANDLE heartbeatThread;
 DWORD WINAPI network_receive_thread(LPVOID lpParam);
 DWORD WINAPI heartbeat_thread(LPVOID lpParam);
 
-#endif 
+// Function to stop network threads
+void stop_network_threads(void);
+void process_received_message(Message* message);
+
+#endif

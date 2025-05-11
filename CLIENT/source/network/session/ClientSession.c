@@ -1,8 +1,14 @@
 #include "network/session/ClientSession.h"
 #include "network/log/ClientLogging.h"
+#include "security/NetworkSecurity.h"
+#include "utilsnetwork/Message.h"
+#include "network/core/MessageSender.h" 
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
+// Global variable for the current session
 static ClientSession* current_session = NULL;
 
 // Create a new client session
@@ -22,6 +28,7 @@ ClientSession* create_client_session(SOCKET socket) {
     log_client_message(LOG_INFO, "Client session created successfully");
     return session;
 }
+
 // Set the current session
 bool set_current_session(ClientSession* session) {
     if (current_session) {
@@ -101,4 +108,4 @@ bool is_session_valid(ClientSession* session) {
 // Check if an initial session is valid
 bool is_session_valid_initial(ClientSession* session) {
     return session && session->socket != INVALID_SOCKET;
-} 
+}

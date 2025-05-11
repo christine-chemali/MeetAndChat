@@ -8,4 +8,4 @@
 extern bool send_message_to_server(Message* msg);
 bool send_generic_message(int type, const char* data, size_t length);
 
-#endif 
+#endif
