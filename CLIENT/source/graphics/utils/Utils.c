@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
+#include <glib.h>
 
 //Password visibility
 void
@@ -12,6 +13,9 @@ toggle_passwordVisibility(GtkWidget *widget, gpointer data)
 
 // Error, info popup dialog box
    void show_custom_dialog(const char *title, const char *message) {
+
+    char* utf8_message = g_utf8_make_valid(message, -1);
+
     GtkApplication *app = GTK_APPLICATION(g_application_get_default());
     GtkWindow *parent_window = app ? gtk_application_get_active_window(app) : NULL;
 
@@ -34,7 +38,8 @@ toggle_passwordVisibility(GtkWidget *widget, gpointer data)
     gtk_widget_set_margin_top(content_box, 10);
     gtk_widget_set_margin_bottom(content_box, 10);
 
-    GtkWidget *pop_label = gtk_label_new(message);
+    //GtkWidget *pop_label = gtk_label_new(message);
+    GtkWidget *pop_label = gtk_label_new(utf8_message); 
     gtk_label_set_wrap(GTK_LABEL(pop_label), TRUE); //*Rmber
     gtk_widget_set_css_classes(pop_label, (const char *[]){"custom-label", NULL});
     gtk_box_append(GTK_BOX(content_box), pop_label);
@@ -50,5 +55,6 @@ toggle_passwordVisibility(GtkWidget *widget, gpointer data)
     g_signal_connect_swapped(ok_button, "clicked", G_CALLBACK(gtk_window_destroy), dialog);
     gtk_box_append(GTK_BOX(button_box), ok_button);
 
+    g_free(utf8_message);
     gtk_window_present(GTK_WINDOW(dialog));
 }

@@ -11,18 +11,22 @@
 #include <stdio.h>
 #include <string.h>
 
+
 // Handle login response
 void handle_login_response(Message* msg) {
     bool success = false;
     char message[256] = {0};
     char username[256] = {0};
+
+    // Convert UTF-8 
+    char* utf8_data = g_utf8_make_valid(msg->data, -1);
     
-    if (sscanf(msg->data, "%d:%[^|]|%s", &success, message, username) != 3) {
+    if (sscanf(utf8_data, "%d:%[^\n]", &success, message) != 2) { 
         success = false;
         strncpy(message, "Invalid server response", sizeof(message) - 1);
         log_client_message(LOG_ERROR, "Invalid login response from server");
     }
-    
+
     ClientSession* session = get_current_session();
     
     if (success && session) {
@@ -37,6 +41,10 @@ void handle_login_response(Message* msg) {
         log_client_message(LOG_WARNING, "Authentication failed");
     }
     
+    g_free(utf8_data);
+    
+    char* display_message = g_utf8_make_valid(message, -1);
+    
     log_client_message(LOG_INFO, "Received login response from server");
     g_idle_add((GSourceFunc)on_login_response, g_memdup2(&(struct {
         bool success;
@@ -45,6 +53,8 @@ void handle_login_response(Message* msg) {
         bool success;
         char message[256];
     })));
+
+    g_free(display_message);  
 }
 
 // Handle disconnect response

@@ -4,6 +4,8 @@
    #include "security/NetworkSecurity.h"
    #include <stdio.h>
    #include <string.h>
+   #include <stdlib.h>
+   #include <glib.h>
 
    // Handle login request
 bool handle_login_request(ClientSession* session, Message* msg) {
@@ -98,7 +100,17 @@ bool handle_login_request(ClientSession* session, Message* msg) {
 bool send_login_response(ClientSession* session, bool success, const char* message) {
     Message response;
     response.type = LOGIN_RESPONSE;
-    snprintf(response.data, MAX_MESSAGE_LENGTH, "%d:%s", success ? 1 : 0, message);
+    
+    // Convert in vali UTF-8 
+    char utf8_message[MAX_MESSAGE_LENGTH];
+    g_strlcpy(utf8_message, message, sizeof(utf8_message));
+    
+    // Verify and cleanup UTF-8
+    if (!g_utf8_validate(utf8_message, -1, NULL)) {
+        g_utf8_make_valid(utf8_message, -1);
+    }
+    
+    snprintf(response.data, MAX_MESSAGE_LENGTH, "%d:%s", success ? 1 : 0, utf8_message);
     response.length = strlen(response.data);
     response.checksum = calculate_checksum(response.data, response.length);
     
