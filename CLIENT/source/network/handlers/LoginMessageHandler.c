@@ -11,8 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 
-
-// Handle login response
+    // Handle login response
 void handle_login_response(Message* msg) {
     bool success = false;
     char message[256] = {0};
@@ -43,18 +42,21 @@ void handle_login_response(Message* msg) {
     
     g_free(utf8_data);
     
-    char* display_message = g_utf8_make_valid(message, -1);
+    // struct def
+    typedef struct {
+        bool success;
+        char message[256];
+    } LoginResponse;
     
-    log_client_message(LOG_INFO, "Received login response from server");
-    g_idle_add((GSourceFunc)on_login_response, g_memdup2(&(struct {
-        bool success;
-        char message[256];
-    }){success, {0}}, sizeof(struct {
-        bool success;
-        char message[256];
-    })));
-
-    g_free(display_message);  
+    // Allocate memory
+    LoginResponse* response_data = g_new0(LoginResponse, 1);
+    
+    // fill the struct
+    response_data->success = success;
+    strncpy(response_data->message, message, sizeof(response_data->message) - 1);
+    
+    // Add callback
+    g_idle_add((GSourceFunc)on_login_response, response_data);
 }
 
 // Handle disconnect response

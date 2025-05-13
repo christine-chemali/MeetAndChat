@@ -9,7 +9,7 @@ void set_gui_stack(GtkWidget *stack);
 gboolean show_main_content(gpointer stack);
 
 // Network response callbacks
-void on_login_response(bool success, const char* message);
+gboolean on_login_response(gpointer user_data);
 void on_register_response(bool success, const char* message);
 void on_message_received(const char* username, const char* message);
 void on_history_received(const char* username, const char** messages, int count);

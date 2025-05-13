@@ -21,15 +21,24 @@ gboolean show_main_content(gpointer stack) {
 }
 
 // Callback login handles errors
-void on_login_response(bool success, const char* message) {
-    if (success) {
+gboolean on_login_response(gpointer user_data) {
+    typedef struct {
+        bool success;
+        char message[256];
+    } LoginResponse;
+
+    LoginResponse* data = (LoginResponse*)user_data;
+
+    if (data->success) {
         log_client_message(LOG_INFO, "Login successful");
-        g_idle_add(show_main_content, g_stack);
+        show_main_content(g_stack);
     } else {
         log_client_message(LOG_ERROR, "Login failed");
-        const char* error_msg = message ? message : "Unknown error occurred";
-        g_idle_add((GSourceFunc)show_custom_dialog, g_strdup_printf("Login Error: %s", error_msg));
+        show_custom_dialog("Login Error", data->message);
     }
+    
+    g_free(user_data);
+    return G_SOURCE_REMOVE;
 }
 
 // Callback for received messages
