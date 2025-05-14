@@ -16,7 +16,7 @@ void handle_message_response(Message* msg) {
 
 // Parse and handle fetched messages  
 void handle_fetch_messages_response(Message* msg) {   
-  // Cette fonction était vide dans le code d'origine
+  //see if needed
 }
 
 // Send a chat message

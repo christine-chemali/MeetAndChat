@@ -67,20 +67,31 @@ void on_user_status_changed(const char* username, bool is_online) {
 }
 
 // Callback for register response
-void on_register_response(bool success, const char* message) {
-    log_client_message(LOG_INFO, "Register response received");
-    if (success) {
-        g_idle_add((GSourceFunc)show_custom_dialog, 
-                   g_strdup("Registration successful"));
-        // Retour à l'écran de login
+gboolean on_register_response(gpointer user_data) {
+    if (!user_data) {
+        log_client_message(LOG_ERROR, "Invalid register response data");
+        return G_SOURCE_REMOVE;
+    }
+
+    struct {
+        bool success;
+        char message[256];
+    } *response = user_data;
+
+    log_client_message(LOG_INFO, "Processing registration response");
+
+    if (response->success) {
+        show_custom_dialog("Success", "Registration successful");
         if (g_stack) {
-            g_idle_add((GSourceFunc)gtk_stack_set_visible_child_name, 
-                      GINT_TO_POINTER("login"));
+            gtk_stack_set_visible_child_name(GTK_STACK(g_stack), "login");
         }
     } else {
-        g_idle_add((GSourceFunc)show_custom_dialog, 
-                   g_strdup_printf("Registration failed: %s", message));
+        show_custom_dialog("Registration Error", 
+            response->message[0] ? response->message : "Registration failed");
     }
+
+    g_free(response);
+    return G_SOURCE_REMOVE; 
 }
 
 //Disconnect button

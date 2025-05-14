@@ -10,7 +10,7 @@ gboolean show_main_content(gpointer stack);
 
 // Network response callbacks
 gboolean on_login_response(gpointer user_data);
-void on_register_response(bool success, const char* message);
+gboolean on_register_response(gpointer user_data);
 void on_message_received(const char* username, const char* message);
 void on_history_received(const char* username, const char** messages, int count);
 void on_user_status_changed(const char* username, bool is_online);

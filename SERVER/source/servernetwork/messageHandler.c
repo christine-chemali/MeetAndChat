@@ -2,6 +2,7 @@
 #include "servernetwork/login/LoginHandler.h"
 #include "security/NetworkSecurity.h"
 #include "servernetwork/ServerSession.h"
+#include "servernetwork/login/RegisterHandler.h"
 #include "serverlogging/ServerLogging.h"
 #include <time.h>
 #include <stdio.h>
@@ -214,7 +215,16 @@ void handle_client_message(ClientSession* session, Message* msg) {
             free(response);
             break;
         }
-    
+
+        case REGISTER_REQUEST: {
+            snprintf(log_buffer, sizeof(log_buffer), 
+                "MSG: Registration attempt from socket %d", 
+                (int)session->clientSocket);
+            log_server_message(LOG_INFO, log_buffer);
+            handle_register_request(session, msg);
+            break;
+        }
+        
         default: {
             snprintf(log_buffer, sizeof(log_buffer), 
                 "MSG: Unknown message type %d from socket %d", 
