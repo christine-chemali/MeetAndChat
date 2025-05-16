@@ -185,16 +185,24 @@ void handle_client_message(ClientSession* session, Message* msg) {
             handle_login_request(session, msg);
             break;
         }
-           
-        case LOGOUT: {
-            snprintf(log_buffer, sizeof(log_buffer), 
-                "MSG: Processing logout request from socket %d", 
-                (int)session->clientSocket);
-            log_server_message(LOG_INFO, log_buffer);
-            handle_logout_request(session);
-            break;
-        }
+
+    case LOGOUT_REQUEST: {
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "MSG: Processing disconnect request from socket %d", 
+            (int)session->clientSocket);
+        log_server_message(LOG_INFO, log_buffer);
+        break;  // Simplement accuser réception du message
+    }
     
+    case LOGOUT: {
+        snprintf(log_buffer, sizeof(log_buffer), 
+            "MSG: Processing logout request from socket %d", 
+            (int)session->clientSocket);
+        log_server_message(LOG_INFO, log_buffer);
+        handle_logout_request(session);
+        break;
+    }
+
         case HEARTBEAT: {
             snprintf(log_buffer, sizeof(log_buffer), 
                 "MSG: Processing heartbeat from socket %d (idle: %02d:%02d:%02d)", 

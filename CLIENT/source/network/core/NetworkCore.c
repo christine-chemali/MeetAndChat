@@ -58,6 +58,11 @@ bool check_connection_status(void) {
 
 // Initialize the network connection
 bool initialize_network(const char* address, int port) {
+    // Save parameters connection till the start
+    strncpy(last_known_address, address, sizeof(last_known_address) - 1);
+    last_known_address[sizeof(last_known_address) - 1] = '\0';
+    last_known_port = port;
+
     log_client_message(LOG_INFO, "Starting network initialization...");
     
     if (isConnected) {
@@ -240,7 +245,7 @@ bool initialize_network(const char* address, int port) {
 }
 
 // Clean up the network resources
-void cleanup_network(void) {
+   void cleanup_network(void) {
     if (isConnected) {
         ClientSession* session = get_current_session();
         
@@ -280,8 +285,7 @@ void cleanup_network(void) {
         memset(current_user, 0, sizeof(current_user));
         WSACleanup();
         
-        memset(last_known_address, 0, sizeof(last_known_address));
-        last_known_port = 0;
+        // do not clean last_known_address and last_known_port
     }
 }
 
@@ -306,4 +310,38 @@ void disconnect_from_server(void) {
         send_disconnect_request(session->username);
     }
     cleanup_network();
+}
+
+// Re init session parameters
+void reset_session_parameters(void) {
+    ClientSession* session = get_current_session();
+    if (session) {
+        session->isAuthenticated = false;
+        session->lastActivity = 0;
+        memset(session->username, 0, sizeof(session->username));
+        // Keep the socket but re init everything else
+    }
+    update_network_state(NETWORK_STATE_DISCONNECTED);
+}
+
+// re init the network connection
+bool reinitialize_network_connection(void) {
+    if (strlen(last_known_address) == 0 || last_known_port <= 0 || last_known_port > 65535) {
+        log_client_message(LOG_ERROR, "Invalid stored connection parameters");
+        return false;
+    }
+
+    reset_session_parameters();
+    
+    // Wait 1/2 sec before reconnection
+    Sleep(500);
+    
+    return initialize_network(last_known_address, last_known_port);
+}
+
+// Secure reconnection
+bool safe_reconnect(void) {
+    cleanup_network();
+    Sleep(500); //wait 1/2 sec before reconnection
+    return reinitialize_network_connection();
 }

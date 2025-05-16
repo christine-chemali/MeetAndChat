@@ -120,14 +120,10 @@ bool send_login_response(ClientSession* session, bool success, const char* messa
 }
 
 // Handle disconnect request
-bool handle_disconnect_request(ClientSession* session, const char* email) {
-    if (!session->isAuthenticated) {
-        return send_login_response(session, false, "Not authenticated");
-    }
-
+   bool handle_disconnect_request(ClientSession* session, const char* email) {
     PGconn *conn = get_database_connection();
     if (!conn) {
-        return send_login_response(session, false, "Server error during disconnect");
+        return false;
     }
 
     const char *query = "UPDATE users SET is_online = false, last_seen = CURRENT_TIMESTAMP WHERE email = $1";
@@ -138,13 +134,16 @@ bool handle_disconnect_request(ClientSession* session, const char* email) {
     PQclear(res);
 
     if (success) {
+        // re init session without closing connection
         session->isAuthenticated = false;
         session->userId = 0;
         memset(session->email, 0, sizeof(session->email));
+        
+        //keep the socket open to allow reconnection
         return send_login_response(session, true, "Disconnected successfully");
-    } else {
-        return send_login_response(session, false, "Error during disconnect");
     }
+    
+    return false;
 }
 
 // Handle logout request

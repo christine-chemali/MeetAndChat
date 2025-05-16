@@ -67,16 +67,26 @@ void show_login(GtkWidget *widget, gpointer stack) {
 void on_disconnect_button_clicked(GtkWidget *widget, gpointer stack) {
     log_client_message(LOG_INFO, "Disconnecting from server");
     
-    const char* current_user = get_current_user(); // Vous devrez implémenter cette fonction
+    const char* current_user = get_current_user();
     if (send_disconnect_request(current_user)) {
         log_client_message(LOG_INFO, "Disconnect request sent successfully");
-        cleanup_network();
-        show_login(widget, stack);
+        
+        // Re init connection without closing it completely
+        if (reinitialize_network_connection()) {
+            show_login(widget, stack);
+        } else {
+            // if re init fail try a bright new connection
+            if (safe_reconnect()) {
+                show_login(widget, stack);
+            } else {
+                show_custom_dialog("Error", "Failed to maintain connection. Please restart the application.");
+                cleanup_network();
+                show_login(widget, stack);
+            }
+        }
     } else {
         log_client_message(LOG_ERROR, "Failed to send disconnect request");
-        show_custom_dialog("Error", "Failed to disconnect properly. Returning to login.");
-        cleanup_network();
-        show_login(widget, stack);
+        show_custom_dialog("Error", "Failed to disconnect properly");
     }
 }
 

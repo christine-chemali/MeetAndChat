@@ -38,4 +38,9 @@ void cleanup_network(void);
 void handle_network_error(void);
 void disconnect_from_server(void);
 
+// To handle reconnection
+void reset_session_parameters(void);
+bool reinitialize_network_connection(void);
+bool safe_reconnect(void);
+
 #endif
