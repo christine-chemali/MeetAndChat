@@ -1,4 +1,5 @@
    #include "servernetwork/login/LoginHandler.h"
+   #include "serverlogging/ServerLogging.h"
    #include "serverdatabase/ServerDatabase.h"
    #include "serversecurity/hash.h"
    #include "security/NetworkSecurity.h"
@@ -9,7 +10,13 @@
 
    // Handle login request
 bool handle_login_request(ClientSession* session, Message* msg) {
-    printf("Processing login request from client %d\n", (int)session->clientSocket);
+    char log_buffer[256];
+        // Log incoming request with socket ID
+    snprintf(log_buffer, sizeof(log_buffer), 
+        "Processing login request from socket %d", 
+        (int)session->clientSocket);
+    log_server_message(LOG_INFO, log_buffer);
+    
     
     char email[256], password[256];
     if (sscanf(msg->data, "%[^:]:%s", email, password) != 2) {
